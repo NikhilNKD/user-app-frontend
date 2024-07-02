@@ -1,58 +1,112 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Alert, ScrollView } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 
-export default function ViewOrder({ route }) {
-  const { custPhoneNumber, shopID } = route.params || {};
+const ViewOrder = () => {
+  const route = useRoute();
+  const { shopID, custPhoneNumber } = route.params;
+
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    fetchOrders();
-  }, []);
+    const fetchOrderDetails = async () => {
+      try {
+        const response = await fetch(`http://192.168.29.67:3000/getOrderDetails?shopID=${shopID}&custPhoneNumber=${custPhoneNumber}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch order details.');
+        }
+        const data = await response.json();
+        setOrders(data);
+      } catch (error) {
+        console.error('Error fetching order details:', error);
+        Alert.alert('Failed to fetch order details. Please try again.');
+      }
+    };
 
-  const fetchOrders = async () => {
-    try {
-      const response = await fetch(`http://192.168.29.67:3000/getShopOrders?custPhoneNumber=${custPhoneNumber}&shopID=${shopID}`);
-      const data = await response.json();
-      setOrders(data);
-    } catch (error) {
-      console.error('Error fetching shop orders:', error);
-    }
-  };
+    fetchOrderDetails();
+  }, [shopID, custPhoneNumber]);
 
-  const renderItem = ({ item }) => (
-    <View style={styles.orderContainer}>
-      <Text style={styles.orderText}>Order ID: {item.id}</Text>
-      <Text style={styles.orderText}>Customer Name: {item.customerName}</Text>
-      <Text style={styles.orderText}>Total Price: ₹{item.totalPrice}</Text>
-      <Text style={styles.orderText}>Order Date: {item.selectedDate}</Text>
-      <Text style={styles.orderText}>Order Time: {item.selectedTime}</Text>
-    </View>
-  );
+  if (orders.length === 0) {
+    return (
+      <View style={styles.container}>
+        <Text>No orders found for this shop.</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={orders}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
-      />
-    </View>
+    <ScrollView style={styles.container}>
+      <Text style={styles.title}>Order Details for Shop: {shopID}</Text>
+      {orders.map(order => (
+        <View key={order.id} style={styles.orderContainer}>
+          <Text>Total Price: ₹{order.totalPrice}</Text>
+          <FlatList
+            data={JSON.parse(order.cartItems)}
+            renderItem={({ item }) => (
+              <View style={styles.cartItemContainer}>
+                <Text style={styles.productName}>{item.product_name}</Text>
+                <Text>Price: ₹{item.price}</Text>
+                <Text>Quantity: {item.quantity}</Text>
+              </View>
+            )}
+            keyExtractor={(item) => item.id.toString()}
+            scrollEnabled={false}
+          />
+        </View>
+      ))}
+    </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 16,
   },
   orderContainer: {
-    padding: 20,
-    backgroundColor: '#f0f0f0',
-    marginBottom: 10,
-    borderRadius: 5,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    backgroundColor: '#fff',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
   },
-  orderText: {
+  orderID: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#555',
+    marginBottom: 8,
+  },
+  cartItemsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    marginVertical: 10,
+  },
+  cartItemContainer: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+    marginBottom: 8,
+    backgroundColor: '#fafafa',
+  },
+  productName: {
     fontSize: 16,
-    marginBottom: 5,
+    fontWeight: 'bold',
+    color: '#333',
   },
 });
+
+export default ViewOrder;
