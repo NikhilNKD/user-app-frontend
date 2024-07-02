@@ -125,7 +125,7 @@ export default function SearchShops({ route }) {
   
 
 const handleShopPress = (shop) => {
-  const { phoneNumber, storeImage, shopkeeperName, shopType } = shop;
+  const { phoneNumber, storeImage, shopkeeperName, shopType , shopID  } = shop;
 
   if (shopType === 'product') {
     navigation.navigate('ShopkeeperMyProducts', { 
@@ -133,7 +133,7 @@ const handleShopPress = (shop) => {
       storeImage, 
       shopkeeperName, 
       userType, 
-      shopID: shop.id, 
+      shopID, 
       firstcustomerName,
       shopkeeperName:shopkeeperName // Passing shopkeeperName to ShopkeeperMyProducts
     });
@@ -143,7 +143,7 @@ const handleShopPress = (shop) => {
       storeImage, 
       shopkeeperName, 
       userType, 
-      shopID: shop.id, 
+      shopID, 
       firstcustomerName,
       shopkeeperName:shopkeeperName // Passing shopkeeperName to MyServices
     });

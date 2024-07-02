@@ -32,23 +32,30 @@ export const CartProvider = ({ children }) => {
   const [customerPincode, setCustomerPincode] = useState('');
 
   // Function to add item to cart for a specific customer
-  const addToCart = (custPhoneNumber, product, shopkeeperName, shopkeeperPhoneNumber) => {
+  const addToCart = (custPhoneNumber, product, shopkeeperName, shopkeeperPhoneNumber, shopID) => {
     const updatedCartItems = { ...cartItems };
-
+  
     if (!updatedCartItems[custPhoneNumber]) {
       updatedCartItems[custPhoneNumber] = [];
     }
-
-    const existingItemIndex = updatedCartItems[custPhoneNumber].findIndex(item => item.id === product.id);
-
+  
+    const existingItemIndex = updatedCartItems[custPhoneNumber].findIndex(item => item.id === product.id && item.shopID === shopID);
+  
     if (existingItemIndex !== -1) {
       updatedCartItems[custPhoneNumber][existingItemIndex].quantity++;
     } else {
-      updatedCartItems[custPhoneNumber].push({ ...product, quantity: 1, shopkeeperName: shopkeeperName, shopkeeperPhoneNumber: shopkeeperPhoneNumber });
+      updatedCartItems[custPhoneNumber].push({ 
+        ...product, 
+        quantity: 1, 
+        shopkeeperName: shopkeeperName, 
+        shopkeeperPhoneNumber: shopkeeperPhoneNumber,
+        shopID: shopID // Add shopID to the product object
+      });
     }
-
+  
     setCartItems(updatedCartItems);
   };
+  
 
   // Function to remove item from cart for a specific customer
   const removeFromCart = (custPhoneNumber, productId) => {

@@ -4,7 +4,7 @@ import { useCart, useCustomer } from '../../Context/ContextApi';
 import { useNavigation } from '@react-navigation/native';
 
 const CartScreen = () => {
-  const { cartItems, removeFromCart, setCartItems, custPhoneNumber, shopID } = useCart();
+  const { cartItems, removeFromCart, setCartItems, custPhoneNumber,shopID } = useCart();
   const { firstCustomerName, shopkeeperPhoneNumber } = useCustomer();
   const navigation = useNavigation();
 
@@ -13,7 +13,9 @@ const CartScreen = () => {
       <Text style={styles.itemName}>{item.main_category}</Text>
       <Text>Product Name: {item.product_name}</Text>
       <Text>Brand: {item.brand_name}</Text>
+      <Text>Store Name: {item.shopID}</Text>
       <Text>Weight: {item.weight}</Text>
+      
       <Text>Phonenumber: {item.shopkeeperPhoneNumber}</Text>
       
       <View style={styles.quantityContainer}>

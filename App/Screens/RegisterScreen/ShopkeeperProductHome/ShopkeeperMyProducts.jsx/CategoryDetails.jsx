@@ -3,20 +3,21 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Image } from
 import { useCart } from '../../../../Context/ContextApi';
 
 const CategoryDetails = ({ route }) => {
-  const { category, shopkeeperName , shopkeeperPhonenumber } = route.params;
+  const { category, shopkeeperName , shopkeeperPhonenumber,shopID } = route.params;
   const { addToCart, custPhoneNumber, userType, firstCustomerName } = useCart(); // Using addToCart function and custPhoneNumber from CartContext
   
   const [products, setProducts] = useState(category.products);
 
   // Function to add a product to the cart
   const addProductToCart = (product) => {
-    addToCart(custPhoneNumber, product, shopkeeperName, shopkeeperPhonenumber); // Ensure shopID is part of the product
+    addToCart(custPhoneNumber, product, shopkeeperName, shopkeeperPhonenumber,shopID); // Ensure shopID is part of the product
     Alert.alert('Product added to cart successfully!');
   };
   
 
   // Function to render each product item
   const renderProduct = ({ item }) => {
+    console.log(item);
     const renderButton = () => {
       if (userType === 'customer') {
         return (
@@ -35,7 +36,7 @@ const CategoryDetails = ({ route }) => {
         <Text>ID: {item.id}</Text>
         <Text>Brand: {item.brand_name}</Text>
         <Text>Price: ${item.price}</Text>
-        <Text>Store Name: {item.shopID}</Text>
+        <Text>Store Name: {shopID}</Text>
         <Text>Weight: {item.weight}</Text>
         {renderButton()}
       </View>
