@@ -129,7 +129,7 @@ const handleShopPress = (shop) => {
 
   if (shopType === 'product') {
     navigation.navigate('ShopkeeperMyProducts', { 
-      shopkeeperPhonenumber : phoneNumber, 
+      shopkeeperPhoneNumber : phoneNumber, 
       storeImage, 
       shopkeeperName, 
       userType, 

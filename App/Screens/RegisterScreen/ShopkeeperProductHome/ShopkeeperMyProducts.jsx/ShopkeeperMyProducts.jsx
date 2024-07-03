@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const ShopkeeperMyProducts = ({ route }) => {
     const [categories, setCategories] = useState([]);
-    const {  userType , shopkeeperName , shopkeeperPhonenumber , shopID } = route.params;
+    const { userType, shopkeeperName, shopkeeperPhoneNumber, shopID } = route.params;
     const navigation = useNavigation();
 
     useEffect(() => {
@@ -13,7 +13,7 @@ const ShopkeeperMyProducts = ({ route }) => {
 
     const fetchSelectedProducts = async () => {
         try {
-            const response = await fetch(`http://192.168.29.67:3000/myProducts/${shopkeeperPhonenumber}`);
+            const response = await fetch(`http://192.168.29.67:3000/myProducts/${shopkeeperPhoneNumber}`);
             if (response.ok) {
                 const data = await response.json();
                 const groupedCategories = groupProductsByCategory(data);
@@ -41,15 +41,10 @@ const ShopkeeperMyProducts = ({ route }) => {
     };
 
     const renderCategory = ({ item, index }) => (
-        
         <TouchableOpacity
-        
             style={[styles.categoryContainer, index % 2 === 1 ? styles.rightMargin : null]}
-          
-            onPress={() => navigation.navigate('CategoryDetails', { category: item, shopkeeperPhonenumber:shopkeeperPhonenumber , userType , shopkeeperName:shopkeeperName , shopID:shopID })}>
+            onPress={() => navigation.navigate('CategoryDetails', { category: item, shopkeeperPhoneNumber:shopkeeperPhoneNumber, userType, shopkeeperName, shopID })}>
             <Text style={styles.categoryName}>{item.main_category}</Text>
-            <Text style={styles.categoryName}>{shopID}</Text>
-            
         </TouchableOpacity>
     );
 
@@ -59,15 +54,15 @@ const ShopkeeperMyProducts = ({ route }) => {
                 data={categories}
                 renderItem={renderCategory}
                 keyExtractor={(item) => item.main_category}
-                numColumns={2} // Set number of columns to 2
-                contentContainerStyle={styles.contentContainer} // Apply contentContainerStyle
+                numColumns={2}
+                contentContainerStyle={styles.contentContainer}
             />
         </View>
     );
 };
 
 const { width } = Dimensions.get('window');
-const itemWidth = (width - 32) / 2; // Calculate item width for two items per row
+const itemWidth = (width - 32) / 2;
 
 const styles = StyleSheet.create({
     container: {
@@ -96,7 +91,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     rightMargin: {
-        marginRight: 0, // No need for right margin in this layout
+        marginRight: 0,
     },
 });
 

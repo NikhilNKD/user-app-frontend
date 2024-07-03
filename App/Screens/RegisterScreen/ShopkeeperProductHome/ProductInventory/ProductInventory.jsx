@@ -15,7 +15,7 @@ const ProductInventory = ({ route }) => {
         setFilteredProducts([]);
         setLoading(true);
         fetchProducts();
-    }, [phoneNumber]);
+    }, [shopkeeperPhoneNumber]);
 
     useEffect(() => {
         // Filter products when search text changes
@@ -53,7 +53,7 @@ const ProductInventory = ({ route }) => {
 
     const updateProductsAddedStatus = async (products) => {
         try {
-            const addedProducts = await AsyncStorage.getItem(`addedProducts_${phoneNumber}`);
+            const addedProducts = await AsyncStorage.getItem(`addedProducts_${shopkeeperPhoneNumber}`);
             const addedProductsArray = addedProducts ? JSON.parse(addedProducts) : [];
             const updatedProducts = products.map(product => ({
                 ...product,
@@ -66,21 +66,22 @@ const ProductInventory = ({ route }) => {
     };
 
     const handleAddProduct = async (productId, index) => {
+        console.log('Sending shopkeeperPhoneNumber:', shopkeeperPhoneNumber); // Log to check the value
         try {
             const response = await fetch('http://192.168.29.67:3000/addProduct', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ phoneNumber, productId }),
+                body: JSON.stringify({ shopkeeperPhoneNumber, productId }),
             });
-
+    
             if (response.ok) {
                 const updatedProducts = [...products];
                 updatedProducts[index].added = true;
                 setProducts(updatedProducts);
                 await saveAddedProduct(productId);
-                Alert.alert('Success', 'Product added successfully');
+                Alert.alert('Success', `Product added successfully`);
             } else {
                 console.error('Failed to add product:', response.statusText);
             }
@@ -88,19 +89,20 @@ const ProductInventory = ({ route }) => {
             console.error('Error adding product:', error);
         }
     };
-
+    
     const saveAddedProduct = async (productId) => {
         try {
-            const addedProducts = await AsyncStorage.getItem(`addedProducts_${phoneNumber}`);
+            const addedProducts = await AsyncStorage.getItem(`addedProducts_${shopkeeperPhoneNumber}`);
             const addedProductsArray = addedProducts ? JSON.parse(addedProducts) : [];
             if (!addedProductsArray.includes(productId)) {
                 addedProductsArray.push(productId);
-                await AsyncStorage.setItem(`addedProducts_${phoneNumber}`, JSON.stringify(addedProductsArray));
+                await AsyncStorage.setItem(`addedProducts_${shopkeeperPhoneNumber}`, JSON.stringify(addedProductsArray));
             }
         } catch (error) {
             console.error('Error saving added product:', error);
         }
     };
+    
 
     const renderItem = ({ item, index }) => (
         <View style={styles.productContainer}>

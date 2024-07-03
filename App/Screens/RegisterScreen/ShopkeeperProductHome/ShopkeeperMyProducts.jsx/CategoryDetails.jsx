@@ -3,14 +3,14 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Image } from
 import { useCart } from '../../../../Context/ContextApi';
 
 const CategoryDetails = ({ route }) => {
-  const { category, shopkeeperName , shopkeeperPhonenumber,shopID } = route.params;
+  const { category, shopkeeperName , shopkeeperPhoneNumber,shopID } = route.params;
   const { addToCart, custPhoneNumber, userType, firstCustomerName } = useCart(); // Using addToCart function and custPhoneNumber from CartContext
   
   const [products, setProducts] = useState(category.products);
 
   // Function to add a product to the cart
   const addProductToCart = (product) => {
-    addToCart(custPhoneNumber, product, shopkeeperName, shopkeeperPhonenumber,shopID); // Ensure shopID is part of the product
+    addToCart(custPhoneNumber, product, shopkeeperName, shopkeeperPhoneNumber,shopID); // Ensure shopID is part of the product
     Alert.alert('Product added to cart successfully!');
   };
   
@@ -50,7 +50,7 @@ const CategoryDetails = ({ route }) => {
         <Image source={require('../../../../../assets/logo.png')} style={styles.storeImage} />
         <View style={styles.headerText}>
           <Text style={styles.welcomeText}>Welcome: {firstCustomerName}</Text>
-          <Text style={styles.shoppingAt}>Shopping at: {custPhoneNumber}</Text>
+          <Text style={styles.shoppingAt}>Shopping at: {shopkeeperPhoneNumber}</Text>
         </View>
       </View>
 

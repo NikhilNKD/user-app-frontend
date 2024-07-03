@@ -48,10 +48,10 @@ export default function ShopkeeperProductHome({ route }) {
             // Pass selectedSubCategory as a parameter when navigating to the Inventory screen
             navigation.navigate(screenName, { 
                 selectedSubCategory: selectedSubCategory,  
-                phoneNumber: phoneNumber,  
                 shopkeeperName: shopkeeperName,
                 selectedCategory: selectedCategory,
-                shopkeeperPhoneNumber: shopkeeperPhoneNumber,
+                shopkeeperPhoneNumber:shopkeeperPhoneNumber,
+             
                 userType: userType
             });
         } else if (screenName === 'ShopkeeperMyProducts') {
@@ -60,7 +60,7 @@ export default function ShopkeeperProductHome({ route }) {
                 selectedSubCategory: selectedSubCategory,  
                 shopkeeperName: shopkeeperName,
                 selectedCategory: selectedCategory,
-                shopkeeperPhoneNumber: phoneNumber,
+                shopkeeperPhoneNumber: shopkeeperPhoneNumber,
                 userType: userType
             });
         } else if (screenName === 'ShopkeeperProfileScreen') {
@@ -119,7 +119,7 @@ export default function ShopkeeperProductHome({ route }) {
                     <View style={styles.headerContainer}>
                         <Image source={require('../../../../assets/logo.png')} style={styles.storeImage} />
                         <View style={styles.headerText}>
-                            <Text style={styles.welcomeText}>Welcome: {phoneNumber}</Text>
+                            <Text style={styles.welcomeText}>Welcome:  </Text>
                             <Text style={styles.shoppingAt}>Shop ID: {shopkeeperPhoneNumber}</Text>
                             <Text style={styles.shoppingAt}>Subscription Valid till 10 October 2024</Text>
                         </View>
