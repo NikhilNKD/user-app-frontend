@@ -3,18 +3,17 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Image } from
 import { useCart } from '../../../../Context/ContextApi';
 
 const CategoryDetails = ({ route }) => {
-  const { category, shopkeeperName , shopkeeperPhoneNumber,shopID } = route.params;
-  const { addToCart, custPhoneNumber, userType, firstCustomerName } = useCart(); // Using addToCart function and custPhoneNumber from CartContext
+  const { category, shopkeeperName, shopkeeperPhoneNumber, shopID,userType } = route.params;
+  const { addToCart, custPhoneNumber,   firstCustomerName } = useCart(); // Using addToCart function and custPhoneNumber from CartContext
   
   const [products, setProducts] = useState(category.products);
 
   // Function to add a product to the cart
   const addProductToCart = (product) => {
-    addToCart(custPhoneNumber, product, shopkeeperName, shopkeeperPhoneNumber,shopID); // Ensure shopID is part of the product
+    addToCart(custPhoneNumber, product, shopkeeperName, shopkeeperPhoneNumber, shopID); // Ensure shopID is part of the product
     Alert.alert('Product added to cart successfully!');
   };
   
-
   // Function to render each product item
   const renderProduct = ({ item }) => {
     console.log(item);

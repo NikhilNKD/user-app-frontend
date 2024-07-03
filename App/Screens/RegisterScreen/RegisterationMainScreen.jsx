@@ -9,7 +9,7 @@ const windowHeight = Dimensions.get('window').height;
 
 export default function RegisterationMainScreen({ route }) {
     const navigation = useNavigation();
-    const { phoneNumber } = route.params;
+    const { phoneNumber,userType } = route.params;
 
     const handleCustomerPress = () => {
         // Navigate to the customer screen and pass the phone number and role as parameters

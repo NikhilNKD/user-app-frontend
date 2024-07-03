@@ -55,7 +55,7 @@ export default function OtpScreen2({ route }) {
                     style={styles.logo}
                 />
             </View>
-            <Text style={styles.heading}>Enter OTP</Text>
+            <Text style={styles.heading}>Enter OTP :{userType}</Text>
             <View style={styles.blueBox}>
                 <View style={styles.countryCodeContainer}>
                     <Text style={styles.countryCode}>+91</Text>
