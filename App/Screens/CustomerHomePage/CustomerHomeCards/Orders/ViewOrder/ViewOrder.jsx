@@ -16,7 +16,8 @@ const ViewOrder = () => {
           throw new Error('Failed to fetch order details.');
         }
         const data = await response.json();
-        setOrders(data);
+        console.log('Fetched Order Details:', data);  // Log the data to inspect structure
+        setOrders(data);  // Set data to orders state
       } catch (error) {
         console.error('Error fetching order details:', error);
         Alert.alert('Failed to fetch order details. Please try again.');
@@ -37,11 +38,11 @@ const ViewOrder = () => {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Order Details for Shop: {shopID}</Text>
-      {orders.map(order => (
-        <View key={order.id} style={styles.orderContainer}>
+      {orders.map((order, index) => (
+        <View key={index} style={styles.orderContainer}>
           <Text>Total Price: ₹{order.totalPrice}</Text>
           <FlatList
-            data={JSON.parse(order.cartItems)}
+            data={order.cartItems}  // Assuming cartItems is already an array
             renderItem={({ item }) => (
               <View style={styles.cartItemContainer}>
                 <Text style={styles.productName}>{item.product_name}</Text>
@@ -82,18 +83,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
-  },
-  orderID: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#555',
-    marginBottom: 8,
-  },
-  cartItemsTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginVertical: 10,
   },
   cartItemContainer: {
     padding: 10,

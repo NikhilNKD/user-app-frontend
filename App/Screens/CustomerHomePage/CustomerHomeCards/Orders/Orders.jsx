@@ -7,25 +7,27 @@ const Orders = () => {
   const navigation = useNavigation();
   const { custPhoneNumber } = useContext(CustomerContext);  // Fetch phone number from context
 
-  const [orders, setOrders] = useState([]);
+  const [shops, setShops] = useState([]);
 
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchShops = async () => {
       try {
-        const response = await fetch(`http://192.168.29.67:3000/getOrders?custPhoneNumber=${custPhoneNumber}`);
+        const response = await fetch(`http://192.168.29.67:3000/getCustomerStores?custPhoneNumber=${custPhoneNumber}`);
+        console.log('Response Status:', response.status);  // Log response status
         if (!response.ok) {
-          throw new Error('Failed to fetch orders.');
+          throw new Error('Failed to fetch shops.');
         }
         const data = await response.json();
-        setOrders(data);
+        console.log('Fetched Shops:', data);  // Log the data to inspect structure
+        setShops(data);  // Set data to shops state
       } catch (error) {
-        console.error('Error fetching orders:', error);
-        Alert.alert('Failed to fetch orders. Please try again.');
+        console.error('Error fetching shops:', error);
+        Alert.alert('Failed to fetch shops. Please try again.');
       }
     };
 
     if (custPhoneNumber) {
-      fetchOrders();
+      fetchShops();
     }
   }, [custPhoneNumber]);
 
@@ -48,7 +50,7 @@ const Orders = () => {
   return (
     <View style={styles.container}>
       <FlatList
-        data={orders}
+        data={shops}
         renderItem={renderItem}
         keyExtractor={(item) => item.shopID}
       />
