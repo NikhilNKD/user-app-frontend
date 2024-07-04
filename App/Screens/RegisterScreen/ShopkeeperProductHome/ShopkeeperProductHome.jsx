@@ -73,7 +73,34 @@ export default function ShopkeeperProductHome({ route }) {
                 shopkeeperPhoneNumber: shopkeeperPhoneNumber,
                 userType: userType
             });
-        } else {
+            
+           
+        } 
+        
+        else if (screenName === 'ShopkeeperOrders'){
+            navigation.navigate(screenName, { 
+                selectedSubCategory: selectedSubCategory,  
+                phoneNumber: phoneNumber,  
+                shopkeeperName: shopkeeperName,
+                selectedCategory: selectedCategory,
+                shopkeeperPhoneNumber: shopkeeperPhoneNumber,
+                userType: userType
+            });
+        }
+        else if (screenName === 'ShopkeeperCustomer'){
+            navigation.navigate(screenName, { 
+                selectedSubCategory: selectedSubCategory,  
+                phoneNumber: phoneNumber,  
+                shopkeeperName: shopkeeperName,
+                selectedCategory: selectedCategory,
+                shopkeeperPhoneNumber: shopkeeperPhoneNumber,
+                userType: userType
+            });
+        }
+        
+        
+        
+        else {
             navigation.navigate(screenName);
         }
     };

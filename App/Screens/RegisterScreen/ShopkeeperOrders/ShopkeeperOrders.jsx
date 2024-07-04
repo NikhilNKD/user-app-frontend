@@ -1,237 +1,155 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
 
 export default function ShopkeeperOrders({ route }) {
-    const [selectedButton, setSelectedButton] = useState('Today');
-    const [orders, setOrders] = useState([]);
-    const { shopkeeperPhoneNumber, shopkeeperName } = route.params || {};
+  const { shopkeeperPhoneNumber } = route.params;
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-    useEffect(() => {
-        fetchShopkeeperOrders(); // Fetch orders when the component mounts
-    }, []);
+  useEffect(() => {
+    // Fetch orders for the shopkeeper
+    fetch(`http://192.168.29.67:3000/shopkeeperOrders/${shopkeeperPhoneNumber}`)
+      .then(response => response.json())
+      .then(data => {
+        setOrders(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch orders:', err);  // Added error logging
+        setError('Failed to fetch orders');
+        setLoading(false);
+      });
+  }, [shopkeeperPhoneNumber]);
 
-    const buttonsData = [
-        { id: 1, title: 'Today' },
-        { id: 2, title: 'Yesterday' },
-        { id: 3, title: 'One Week' },
-        { id: 4, title: '30 Days' },
-        { id: 5, title: 'All Time' },
-        { id: 6, title: 'Select Date Range' },
-    ];
+  if (loading) {
+    return <Text style={styles.loadingText}>Loading...</Text>;
+  }
 
-    const fetchShopkeeperOrders = () => {
-        // Replace the URL with your backend endpoint
-        fetch(`http://192.168.29.67:3000/orders/shopkeeper/${shopkeeperPhoneNumber}`)
-            .then(response => response.json())
-            .then(data => {
-                setOrders(data);
-            })
-            .catch(error => console.error('Error fetching shopkeeper orders:', error));
-    };
+  if (error) {
+    return <Text style={styles.errorText}>{error}</Text>;
+  }
 
-    const renderItem = ({ item }) => (
-        <TouchableOpacity
-            key={item.id}
-            style={[styles.button, selectedButton === item.title && styles.selectedButton]}
-            onPress={() => setSelectedButton(item.title)}>
-            <Text style={[styles.buttonText, selectedButton === item.title && styles.selectedButtonText]}>
-                {item.title}
-            </Text>
-        </TouchableOpacity>
-    );
-
-    const renderOrderItem = ({ item }) => (
-        <View style={styles.orderContainer}>
-            <Text>Order ID: {item.id}</Text>
-            <Text>Total Price: {item.totalPrice}</Text>
-            <Text>Total Price: {item.selectedDate}</Text>
-            {/* Add more order details as needed */}
-            <View style={styles.productButtonsRow}>
-                <TouchableOpacity
-                    style={[styles.productButton, styles.fullFillButton]}
-                    onPress={() => handleProductAction('Full Fill Order')}>
-                    <Text style={styles.productButtonText}>Full Fill Order</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.productButton, styles.viewDetailsButton]}
-                    onPress={() => handleProductAction('View Details')}>
-                    <Text style={styles.productButtonText}>View Details</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.productButton, styles.cancelButton]}
-                    onPress={() => handleProductAction('Cancel Order')}>
-                    <Text style={styles.productButtonText}>Cancel Order</Text>
-                </TouchableOpacity>
-            </View>
-        </View>
-    );
-
-    const handleProductAction = (action) => {
-        console.log('Action:', action);
-    };
+  const renderItem = ({ item }) => {
+    const cartItems = JSON.parse(item.cartItems);
 
     return (
+      <View style={styles.orderContainer}>
+        <Text style={styles.orderTitle}>Order ID: {item.id}</Text>
+        <Text style={styles.customerName}>Customer Name: {item.customerName}</Text>
+        <Text style={styles.customerInfo}>Customer Phone: {item.custPhoneNumber}</Text>
+        <Text style={styles.totalPrice}>Total Price: ${item.totalPrice}</Text>
+        
         <FlatList
-            data={[{ key: 'content' }]}
-            renderItem={({ item }) => (
-                <View style={styles.container}>
-                    <View style={styles.headerContainer}>
-                        <Image source={require('../../../../assets/logo.png')} style={styles.storeImage} />
-                        <View style={styles.headerText}>
-                            <Text style={styles.welcomeText}>Welcome: {shopkeeperName}</Text>
-                            <Text style={styles.shoppingAt}>Shop ID: {shopkeeperPhoneNumber}</Text>
-                            <Text style={styles.shoppingAt}>Subscription Valid till 10 October 2024</Text>
-                        </View>
-                    </View>
-
-                    <Image source={require('../../../../assets/general.png')} style={styles.fullWidthImage} />
-
-                    <View style={styles.circularImageContainer}>
-                        <Image source={require('../../../../assets/name.png')} style={styles.circularImage} />
-                    </View>
-
-                    <Text style={styles.ordersHeading}>My Orders</Text>
-
-                    <View style={styles.buttonContainer}>
-                        {buttonsData.map(item => renderItem({ item }))}
-                    </View>
-
-                    <FlatList
-                        data={orders}
-                        renderItem={renderOrderItem}
-                        keyExtractor={(item) => item.id.toString()}
-                    />
-                </View>
-            )}
-            keyExtractor={(item) => item.key}
-            style={styles.flatList}
+          data={cartItems}
+          keyExtractor={(product) => product.id.toString()}
+          renderItem={({ item: product }) => (
+            <View style={styles.productContainer}>
+              <View style={styles.productDetails}>
+                <Text style={styles.productName}>Product Name: {product.product_name}</Text>
+                <Text style={styles.productText}>Category: {product.main_category}</Text>
+                <Text style={styles.productText}>Brand: {product.brand_name}</Text>
+                <Text style={styles.productText}>Price: ${product.price}</Text>
+                <Text style={styles.productText}>Quantity: {product.quantity}</Text>
+              </View>
+              {product.picture_path ? (
+                <Image
+                  source={{ uri: `http://192.168.29.67:3000${product.picture_path}` }}
+                  style={styles.productImage}
+                />
+              ) : null}
+            </View>
+          )}
         />
+      </View>
     );
+  };
+
+  return (
+    <FlatList
+      data={orders}
+      keyExtractor={(item) => item.id.toString()}
+      renderItem={renderItem}
+      contentContainerStyle={styles.container}  // Added this to style the content of FlatList
+    />
+  );
 }
 
 const styles = StyleSheet.create({
-    flatList: {
-        flex: 1,
-        backgroundColor: '#fff',
-    },
-    container: {
-        flex: 1,
-        padding: 20,
-    },
-    headerContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 20,
-        paddingHorizontal: 10,
-    },
-    storeImage: {
-        width: 90,
-        height: 90,
-        borderRadius: 10,
-    },
-    headerText: {
-        flex: 1,
-        marginLeft: 20,
-    },
-    welcomeText: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 5,
-    },
-    customerName: {
-        fontSize: 16,
-        marginBottom: 5,
-    },
-    shoppingAt: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 5,
-    },
-    fullWidthImage: {
-        width: '100%',
-        height: 150,
-        marginBottom: 20,
-    },
-    circularImageContainer: {
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    circularImage: {
-        width: 100,
-        height: 100,
-        borderRadius: 60,
-        borderWidth: 3,
-        borderColor: 'white',
-        position: 'absolute',
-        top: '50%',
-        left: '50%',
-        transform: [{ translateX: -60 }, { translateY: -60 }],
-    },
-    buttonContainer: {
-        flexDirection: 'row',
-        justifyContent: 'flex-start',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        marginBottom: 20,
-    },
-    button: {
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#C7BC00',
-        margin: 5,
-        width: '30%',
-        height: 40,
-        borderRadius: 50,
-    },
-    buttonText: {
-        fontSize: 14,
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    selectedButton: {
-        backgroundColor: '#333',
-    },
-    selectedButtonText: {
-        color: '#fff',
-    },
-    ordersHeading: {
-        marginTop: 20,
-        fontSize: 26,
-        fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    orderContainer: {
-        backgroundColor: '#E4E4E4',
-        padding: 20,
-        marginBottom: 20,
-        borderRadius: 10,
-    },
-    productButtonsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: 10,
-    },
-    productButton: {
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 5,
-        paddingVertical: 10,
-        marginVertical: 7,
-        minWidth: 100,
-        maxWidth: '100%',
-    },
-    productButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    fullFillButton: {
-        backgroundColor: '#28a745',
-    },
-    viewDetailsButton: {
-        backgroundColor: '#007bff',
-    },
-    cancelButton: {
-        backgroundColor: '#dc3545',
-    },
+  container: {
+    padding: 10,
+    backgroundColor: '#f8f8f8',
+  },
+  loadingText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 18,
+    color: '#333',
+  },
+  errorText: {
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 18,
+    color: 'red',
+  },
+  orderContainer: {
+    padding: 15,
+    marginVertical: 10,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  orderTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#2a2a2a',
+  },
+  customerName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#1e90ff',
+    marginBottom: 5,
+  },
+  customerInfo: {
+    fontSize: 14,
+    color: '#333',
+    marginBottom: 5,
+  },
+  totalPrice: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#d9534f',
+    marginBottom: 10,
+  },
+  productContainer: {
+    marginVertical: 10,
+    padding: 10,
+    backgroundColor: '#f9f9f9',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  productDetails: {
+    marginBottom: 10,
+  },
+  productName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  productText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  productImage: {
+    width: '100%',
+    height: 150,
+    resizeMode: 'cover',
+    marginTop: 10,
+  },
 });

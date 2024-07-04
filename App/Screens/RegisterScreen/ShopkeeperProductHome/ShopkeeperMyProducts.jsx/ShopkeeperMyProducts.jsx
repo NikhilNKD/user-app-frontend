@@ -43,7 +43,7 @@ const ShopkeeperMyProducts = ({ route }) => {
     const renderCategory = ({ item, index }) => (
         <TouchableOpacity
             style={[styles.categoryContainer, index % 2 === 1 ? styles.rightMargin : null]}
-            onPress={() => navigation.navigate('CategoryDetails', { category: item, shopkeeperPhoneNumber:shopkeeperPhoneNumber, userType:userType, shopkeeperName, shopID })}>
+            onPress={() => navigation.navigate('CategoryDetails', { category: item, shopkeeperPhoneNumber:shopkeeperPhoneNumber, userType:userType, shopkeeperName:shopkeeperName, shopID })}>
             <Text style={styles.categoryName}>{item.main_category}</Text>
         </TouchableOpacity>
     );
