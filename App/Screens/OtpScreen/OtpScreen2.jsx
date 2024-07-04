@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Button, TouchableOpacity, Dimensions, Image } from 'react-native';
-import Colors from '../../utils/Colors';
 import { useNavigation } from '@react-navigation/native';
 
 const windowWidth = Dimensions.get('window').width;
@@ -20,27 +19,58 @@ export default function OtpScreen2({ route }) {
         setIsCorrectOtp(true);
     };
 
-    const handleSubmit = async () => {
-        const correctOtp = '1234'; // Example correct OTP
-    
-        // Perform OTP verification
-        if (otp === correctOtp) {
-            setIsCorrectOtp(true);
-            
-            // Navigate user based on userType
-            if (userType === 'shopkeeper') {
-                navigation.navigate('ShopkeeperHome', { phoneNumber: phoneNumber, userType: userType });
-            } 
-            else if (userType === 'customer') {
-                navigation.navigate('CustomerHomePage', { phoneNumber: phoneNumber, userType: userType });
+ const handleSubmit = async () => {
+    const correctOtp = '1234'; // Example correct OTP
+
+    // Perform OTP verification
+    if (otp === correctOtp) {
+        setIsCorrectOtp(true);
+
+        try {
+            const response = await fetch('http://192.168.29.67:3000/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ phoneNumber, userType }),
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                if (userType === 'shopkeeper') {
+                    const shopkeeperResponse = await fetch(`http://192.168.29.67:3000/shopkeeper?phoneNumber=${phoneNumber}`);
+                    const shopkeeperData = await shopkeeperResponse.json();
+                    const selectedCategory = shopkeeperData.selectedCategory;
+
+                    const categoryResponse = await fetch(`http://192.168.29.67:3000/category?name=${selectedCategory}`);
+                    const categoryData = await categoryResponse.json();
+
+                    if (categoryData && categoryData.type) {
+                        const shopkeeperType = categoryData.type;
+
+                        if (shopkeeperType === 'service') {
+                            navigation.navigate('ShopkeeperHome', { phoneNumber:phoneNumber, userType: 'shopkeeper', shopkeeperType,selectedCategory });
+                        } else if (shopkeeperType === 'product') {
+                            navigation.navigate('ShopkeeperProductHome', { phoneNumber:phoneNumber, userType: 'shopkeeper', shopkeeperType,selectedCategory });
+                        }
+                    } else {
+                        console.error('Category type not found');
+                    }
+                } else if (userType === 'customer') {
+                    navigation.navigate('CustomerHomePage', { phoneNumber: phoneNumber, userType: userType });
+                } else if (userType === 'unregistered') {
+                    navigation.navigate('Register', { phoneNumber: phoneNumber, userType: userType });
+                }
+            } else {
+                console.error('Error:', data.error);
             }
-            else if (userType === 'unregistered') {
-                navigation.navigate('Register', { phoneNumber: phoneNumber, userType: userType });
-            }
-        } else {
-            setIsCorrectOtp(false);
+        } catch (error) {
+            console.error('Error:', error);
         }
-    };
+    } else {
+        setIsCorrectOtp(false);
+    }
+};
 
     const handleResend = () => {
         setIsResent(true);

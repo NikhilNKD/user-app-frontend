@@ -51,7 +51,7 @@ export default function ShopkeeperProductHome({ route }) {
                 shopkeeperName: shopkeeperName,
                 selectedCategory: selectedCategory,
                 shopkeeperPhoneNumber:shopkeeperPhoneNumber,
-             
+                phoneNumber:phoneNumber,
                 userType: userType
             });
         } else if (screenName === 'ShopkeeperMyProducts') {
@@ -119,7 +119,7 @@ export default function ShopkeeperProductHome({ route }) {
                     <View style={styles.headerContainer}>
                         <Image source={require('../../../../assets/logo.png')} style={styles.storeImage} />
                         <View style={styles.headerText}>
-                            <Text style={styles.welcomeText}>Welcome:  </Text>
+                            <Text style={styles.welcomeText}>Welcome:{shopkeeperName}  </Text>
                             <Text style={styles.shoppingAt}>Shop ID: {shopkeeperPhoneNumber}</Text>
                             <Text style={styles.shoppingAt}>Subscription Valid till 10 October 2024</Text>
                         </View>

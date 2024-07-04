@@ -3,14 +3,13 @@ import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, ActivityIndi
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ProductInventory = ({ route }) => {
-    const { selectedCategory, phoneNumber, shopkeeperPhoneNumber, shopkeeperName } = route.params;
+    const { selectedCategory, shopkeeperPhoneNumber, shopkeeperName } = route.params;
     const [products, setProducts] = useState([]);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchText, setSearchText] = useState('');
 
     useEffect(() => {
-        // Reset products and loading state when phone number changes
         setProducts([]);
         setFilteredProducts([]);
         setLoading(true);
@@ -18,28 +17,26 @@ const ProductInventory = ({ route }) => {
     }, [shopkeeperPhoneNumber]);
 
     useEffect(() => {
-        // Filter products when search text changes
         filterProducts();
-    }, [searchText]);
+    }, [searchText, products]);
 
     const filterProducts = () => {
         const filtered = products.filter(product =>
-            product.product_name.toLowerCase().startsWith(searchText.toLowerCase()) ||
-            product.brand_name.toLowerCase().startsWith(searchText.toLowerCase())
+            product.product_name.toLowerCase().includes(searchText.toLowerCase()) ||
+            product.brand_name.toLowerCase().includes(searchText.toLowerCase())
         );
         setFilteredProducts(filtered);
     };
-
     const fetchProducts = async () => {
         try {
+            console.log(`Fetching products for category: ${selectedCategory}`);
             const response = await fetch(`http://192.168.29.67:3000/products/${selectedCategory}`);
             if (response.ok) {
                 const data = await response.json();
+                console.log('Fetched products:', data);
                 const productsWithAddedStatus = data.map(product => ({ ...product, added: false }));
                 await updateProductsAddedStatus(productsWithAddedStatus);
-                // Set products directly after fetching
                 setProducts(productsWithAddedStatus);
-                // Filter products
                 filterProducts();
             } else {
                 console.error('Failed to fetch products:', response.statusText);
@@ -50,7 +47,7 @@ const ProductInventory = ({ route }) => {
             setLoading(false);
         }
     };
-
+    
     const updateProductsAddedStatus = async (products) => {
         try {
             const addedProducts = await AsyncStorage.getItem(`addedProducts_${shopkeeperPhoneNumber}`);
@@ -66,7 +63,6 @@ const ProductInventory = ({ route }) => {
     };
 
     const handleAddProduct = async (productId, index) => {
-        console.log('Sending shopkeeperPhoneNumber:', shopkeeperPhoneNumber); // Log to check the value
         try {
             const response = await fetch('http://192.168.29.67:3000/addProduct', {
                 method: 'POST',
@@ -75,7 +71,7 @@ const ProductInventory = ({ route }) => {
                 },
                 body: JSON.stringify({ shopkeeperPhoneNumber, productId }),
             });
-    
+
             if (response.ok) {
                 const updatedProducts = [...products];
                 updatedProducts[index].added = true;
@@ -89,7 +85,7 @@ const ProductInventory = ({ route }) => {
             console.error('Error adding product:', error);
         }
     };
-    
+
     const saveAddedProduct = async (productId) => {
         try {
             const addedProducts = await AsyncStorage.getItem(`addedProducts_${shopkeeperPhoneNumber}`);
@@ -102,30 +98,33 @@ const ProductInventory = ({ route }) => {
             console.error('Error saving added product:', error);
         }
     };
-    
 
     const renderItem = ({ item, index }) => (
         <View style={styles.productContainer}>
-            <Text style={styles.productName}>{item.main_category}</Text>
             <Text style={styles.productName}>{item.product_name}</Text>
             <Text style={styles.productBrand}>{item.brand_name}</Text>
             <Text style={styles.productPrice}>Price: ${item.price}</Text>
             <Text style={styles.productWeight}>Weight: {item.weight}</Text>
-            <Image source={{ uri: `'http://192.168.29.67:3000/${item.picture_path}` }} style={styles.productImage} />
+            {item.picture_path ? (
+                <Image source={{ uri: `http://192.168.29.67:3000/${item.picture_path}` }} style={styles.productImage} />
+            ) : (
+                <View style={styles.noImageContainer}>
+                    <Text>No Image Available</Text>
+                </View>
+            )}
             <TouchableOpacity
                 onPress={() => handleAddProduct(item.id, index)}
                 style={[styles.addButton, { backgroundColor: item.added ? 'gray' : 'green' }]}
-                disabled={item.added}>
-                <Text>{item.added ? 'Added' : 'Add'}</Text>
+                disabled={item.added}
+            >
+                <Text style={styles.addButtonText}>{item.added ? 'Added' : 'Add'}</Text>
             </TouchableOpacity>
         </View>
     );
 
     return (
         <View style={styles.container}>
-            <View style={styles.headerContainer}>
-                {/* Your header content */}
-            </View>
+            <Text style={styles.shopkeeperInfo}>Shopkeeper: {shopkeeperName} ({shopkeeperPhoneNumber})</Text>
             <TextInput
                 style={styles.searchInput}
                 placeholder="Search products..."
@@ -151,10 +150,11 @@ const styles = StyleSheet.create({
         padding: 16,
         backgroundColor: '#fff',
     },
-    headerContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    shopkeeperInfo: {
+        fontSize: 16,
+        fontWeight: 'bold',
         marginBottom: 16,
+        textAlign: 'center',
     },
     searchInput: {
         height: 40,
@@ -195,13 +195,23 @@ const styles = StyleSheet.create({
         resizeMode: 'cover',
         marginBottom: 8,
     },
+    noImageContainer: {
+        width: '100%',
+        height: 200,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#e0e0e0',
+        marginBottom: 8,
+    },
     addButton: {
         marginTop: 8,
-        backgroundColor: 'green',
         paddingVertical: 8,
         paddingHorizontal: 16,
         borderRadius: 5,
         alignItems: 'center',
+    },
+    addButtonText: {
+        color: '#fff',
     },
 });
 
