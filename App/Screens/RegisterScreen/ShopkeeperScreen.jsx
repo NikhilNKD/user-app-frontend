@@ -35,7 +35,7 @@ export default function ShopkeeperScreen({ route }) {
     const [selectedSubCategoryId, setSelectedSubCategoryId] = useState('');
     const [selectedCategoryType, setSelectedCategoryType] = useState('');
     const [deliverToHome, setDeliverToHome] = useState('');
-
+   
 
     const { phoneNumber , userType } = route.params || {};
     
@@ -89,6 +89,24 @@ export default function ShopkeeperScreen({ route }) {
         fetchSubCategories();
     }, [selectedCategoryId]);
     
+    const checkSalesAssociateNumber = async (number) => {
+        try {
+            const response = await fetch(`http://192.168.29.67:3000/checkSalesAssociate/${number}`);
+            if (response.ok) {
+                const data = await response.json();
+                return data.exists; // Assume the API returns { exists: true/false }
+            } else {
+                console.error('Failed to check sales associate');
+                return false;
+            }
+        } catch (error) {
+            console.error('Error checking sales associate:', error);
+            Alert.alert('Error', 'Failed to check sales associate. Please try again later.');
+            return false;
+        }
+    };
+    
+    
     
     
     const handleSubmit = async () => {
@@ -100,14 +118,21 @@ export default function ShopkeeperScreen({ route }) {
             shopState,
             city,
             address,
-           
             selectedCategory,
             selectedSubCategory,
             selectedCategoryType,
             shopBanner,
             profilePicture,
-            deliverToHome
+            deliverToHome,
+            salesAssociateNumber // Include sales associate number
         };
+    
+        // Ensure that the sales associate number is valid
+        const isValid = await checkSalesAssociateNumber(salesAssociateNumber);
+        if (!isValid) {
+            Alert.alert('Invalid Sales Associate', 'The sales associate number is not valid.');
+            return;
+        }
     
         try {
             const response = await fetch('http://192.168.29.67:3000/shopkeeperRegister', {
@@ -117,8 +142,6 @@ export default function ShopkeeperScreen({ route }) {
                 },
                 body: JSON.stringify(data),
             });
-    
-            
     
             const responseData = await response.json();
             alert("Shopkeeper registered");
@@ -137,7 +160,6 @@ export default function ShopkeeperScreen({ route }) {
             Alert.alert('Error', 'Failed to register shopkeeper. Please try again later.');
         }
     };
-    
     
     
     
@@ -168,11 +190,15 @@ export default function ShopkeeperScreen({ route }) {
                 setAddress(value);
                 setRequiredFields({ ...requiredFields, address: value.trim() !== '' });
                 break;
-            
+            case 'salesAssociateNumber':
+                setSalesAssociateNumber(value);
+                setRequiredFields({ ...requiredFields, salesAssociateNumber: value.trim() !== '' }); // Add this case
+                break;
             default:
                 break;
         }
     };
+    
     const pickImage = async (setImage) => {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
@@ -223,6 +249,16 @@ export default function ShopkeeperScreen({ route }) {
                         onChangeText={(value) => handleInputChange(value, 'shopID')}
                     />
                 </View>
+                <View style={styles.inputContainer}>
+    <Text style={styles.label}>Sales Associate Number*</Text>
+    <TextInput
+        style={[styles.input, !requiredFields.salesAssociateNumber && submitted && styles.requiredInput]}
+        placeholder="Sales Associate Number"
+        value={salesAssociateNumber}
+        onChangeText={(value) => handleInputChange(value, 'salesAssociateNumber')}
+        keyboardType="numeric"
+    />
+</View>
                
                 <View style={styles.inputContainer}>
                     <Text style={styles.label}>Your Pincode*</Text>
