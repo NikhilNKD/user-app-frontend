@@ -38,6 +38,8 @@ export default function ShopkeeperScreen({ route }) {
 
 
     const { phoneNumber , userType } = route.params || {};
+    
+    
 
     useEffect(() => {
         (async () => {
@@ -86,11 +88,10 @@ export default function ShopkeeperScreen({ route }) {
 
         fetchSubCategories();
     }, [selectedCategoryId]);
-
-    const handleSubmit = async () => {
-        // Check for required fields and validate data
     
-        // Prepare data
+    
+    
+    const handleSubmit = async () => {
         const data = {
             phoneNumber,
             shopkeeperName,
@@ -99,13 +100,13 @@ export default function ShopkeeperScreen({ route }) {
             shopState,
             city,
             address,
-            salesAssociateNumber,
+           
             selectedCategory,
             selectedSubCategory,
-            selectedCategoryType, // Include the selected category type in the data
+            selectedCategoryType,
             shopBanner,
             profilePicture,
-            deliverToHome  // Include the new field
+            deliverToHome
         };
     
         try {
@@ -117,9 +118,7 @@ export default function ShopkeeperScreen({ route }) {
                 body: JSON.stringify(data),
             });
     
-            if (!response.ok) {
-                throw new Error('Failed to register shopkeeper');
-            }
+            
     
             const responseData = await response.json();
             alert("Shopkeeper registered");
@@ -127,18 +126,22 @@ export default function ShopkeeperScreen({ route }) {
     
             navigation.navigate('Subscription', {
                 phoneNumber: phoneNumber,
-                selectedCategory:selectedCategory,
+                selectedCategory: selectedCategory,
                 selectedSubCategory: selectedSubCategory,
                 selectedSubCategoryId: selectedSubCategoryId,
-                selectedCategoryType: selectedCategoryType,// Pass the category type to the next screen
-                userType:userType
+                selectedCategoryType: selectedCategoryType,
+                userType: userType
             });
         } catch (error) {
             console.error('Error registering shopkeeper:', error);
             Alert.alert('Error', 'Failed to register shopkeeper. Please try again later.');
         }
     };
-
+    
+    
+    
+    
+    
     const handleInputChange = (value, fieldName) => {
         switch (fieldName) {
             case 'shopkeeperName':
@@ -165,15 +168,11 @@ export default function ShopkeeperScreen({ route }) {
                 setAddress(value);
                 setRequiredFields({ ...requiredFields, address: value.trim() !== '' });
                 break;
-            case 'salesAssociateNumber':
-                setSalesAssociateNumber(value);
-                setRequiredFields({ ...requiredFields, salesAssociateNumber: value.trim() !== '' });
-                break;
+            
             default:
                 break;
         }
     };
-
     const pickImage = async (setImage) => {
         try {
             const result = await ImagePicker.launchImageLibraryAsync({
@@ -224,16 +223,7 @@ export default function ShopkeeperScreen({ route }) {
                         onChangeText={(value) => handleInputChange(value, 'shopID')}
                     />
                 </View>
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Sales Associate's Number (Optional)</Text>
-                    <TextInput
-                        style={[styles.input, !requiredFields.salesAssociateNumber && submitted && styles.requiredInput]}
-                        placeholder="Sales Associate's Number"
-                        value={salesAssociateNumber}
-                        onChangeText={(value) => handleInputChange(value, 'salesAssociateNumber')}
-                        keyboardType="numeric"
-                    />
-                </View>
+               
                 <View style={styles.inputContainer}>
                     <Text style={styles.label}>Your Pincode*</Text>
                     <TextInput
@@ -426,3 +416,5 @@ const styles = StyleSheet.create({
         marginLeft: 20,
     },
 });
+
+ 
