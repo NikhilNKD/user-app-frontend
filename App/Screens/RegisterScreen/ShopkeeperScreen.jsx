@@ -124,14 +124,16 @@ export default function ShopkeeperScreen({ route }) {
             shopBanner,
             profilePicture,
             deliverToHome,
-            salesAssociateNumber // Include sales associate number
+            salesAssociateNumber: salesAssociateNumber.trim() === '' ? null : salesAssociateNumber // Set to null if empty
         };
     
-        // Ensure that the sales associate number is valid
-        const isValid = await checkSalesAssociateNumber(salesAssociateNumber);
-        if (!isValid) {
-            Alert.alert('Invalid Sales Associate', 'The sales associate number is not valid.');
-            return;
+        // If salesAssociateNumber is provided, validate it
+        if (salesAssociateNumber.trim() !== '') {
+            const isValid = await checkSalesAssociateNumber(salesAssociateNumber);
+            if (!isValid) {
+                Alert.alert('Invalid Sales Associate', 'The sales associate number is not valid.');
+                return;
+            }
         }
     
         try {
@@ -192,12 +194,13 @@ export default function ShopkeeperScreen({ route }) {
                 break;
             case 'salesAssociateNumber':
                 setSalesAssociateNumber(value);
-                setRequiredFields({ ...requiredFields, salesAssociateNumber: value.trim() !== '' }); // Add this case
+                // salesAssociateNumber is optional, so no change needed here
                 break;
             default:
                 break;
         }
     };
+    
     
     const pickImage = async (setImage) => {
         try {
@@ -250,15 +253,16 @@ export default function ShopkeeperScreen({ route }) {
                     />
                 </View>
                 <View style={styles.inputContainer}>
-    <Text style={styles.label}>Sales Associate Number*</Text>
-    <TextInput
-        style={[styles.input, !requiredFields.salesAssociateNumber && submitted && styles.requiredInput]}
-        placeholder="Sales Associate Number"
-        value={salesAssociateNumber}
-        onChangeText={(value) => handleInputChange(value, 'salesAssociateNumber')}
-        keyboardType="numeric"
-    />
-</View>
+                    <Text style={styles.label}>Sales Associate Number</Text>
+                    <TextInput
+                        style={[styles.input, !requiredFields.salesAssociateNumber && submitted && styles.requiredInput]}
+                        placeholder="Sales Associate Number (Optional)"
+                        value={salesAssociateNumber}
+                        onChangeText={(value) => handleInputChange(value, 'salesAssociateNumber')}
+                        keyboardType="numeric"
+                    />
+                </View>
+
                
                 <View style={styles.inputContainer}>
                     <Text style={styles.label}>Your Pincode*</Text>
