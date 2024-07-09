@@ -3,10 +3,10 @@ import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react
 import { useNavigation } from '@react-navigation/native';
 import { CustomerContext } from '../../../../Context/ContextApi'; // Adjust the import based on your context setup
 
-const Orders = () => {
+const Orders = ({route}) => {
   const navigation = useNavigation();
-  const { custPhoneNumber } = useContext(CustomerContext);  // Fetch phone number from context
-
+  //const { custPhoneNumber } = useContext(CustomerContext);  // Fetch phone number from context
+  const {custPhoneNumber}  = route.params;
   const [shops, setShops] = useState([]);
 
   useEffect(() => {

@@ -18,7 +18,7 @@ export default function ShopkeeperProductHome({ route }) {
 
     const fetchShopkeeperDetails = async () => {
         try {
-            const response = await fetch(`http://192.168.29.67:3000/shopkeeperDetails/${phoneNumber}`);
+            const response = await fetch(`http://192.168.29.67:3000/shopkeeperProductHomeDetails/${phoneNumber}`);
             if (response.ok) {
                 const data = await response.json();
                 setShopkeeperName(data.shopkeeperName);

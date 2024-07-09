@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity } from 'react-native';
 import { useCart } from '../../../../Context/ContextApi'; // Import useCart hook
 
 const SubServices = ({ route }) => {
@@ -17,8 +17,12 @@ const SubServices = ({ route }) => {
     const fetchSubServices = async () => {
         try {
             const response = await fetch(`http://192.168.29.67:3000/shopkeeper/selectedSubServices/${shopPhoneNumber}/${mainServiceId}`);
-            const data = await response.json();
-            setSubServices(data);
+            if (response.ok) {
+                const data = await response.json();
+                setSubServices(data);
+            } else {
+                console.error('Failed to fetch selected sub services:', response.statusText);
+            }
         } catch (error) {
             console.error('Error fetching selected sub services:', error);
         } finally {
@@ -28,7 +32,7 @@ const SubServices = ({ route }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.welcomeText}>Welcome:{firstcustomerName}</Text>
+            <Text style={styles.welcomeText}>Welcome: {firstcustomerName}</Text>
             <Text style={styles.welcomeText}>Shop Phone number: {shopPhoneNumber}</Text>
 
             {loading ? (
@@ -39,13 +43,14 @@ const SubServices = ({ route }) => {
                 <FlatList
                     contentContainerStyle={styles.cardContainer}
                     data={subServices}
-                    keyExtractor={(item, index) => index.toString()}
+                    keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
                         <View style={styles.card}>
                             {/* Display sub service name and fetched price */}
                             <View style={styles.detailsContainer}>
-                                <Text style={styles.subServiceName}>Sub Service: {item.subServiceName}</Text>
-                                <Text style={styles.subServicePrice}>Price: ₹{item.subServicePrice.toFixed(2)}</Text>
+                                <Text style={styles.subServiceName}>Sub Service: {item.subServiceName || 'N/A'}</Text>
+                                <Text style={styles.subServicePrice}>Price: ₹{item.subServicePrice || 'N/A'}</Text>
+                                
                                 {/* Conditionally render Add to Cart button based on userType */}
                                 {userType === 'customer' && (
                                     <TouchableOpacity onPress={() => addToCart(item, custPhoneNumber)} style={styles.addToCartButton}>
