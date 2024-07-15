@@ -11,21 +11,24 @@ const ViewOrder = () => {
   useEffect(() => {
     const fetchOrderDetails = async () => {
       try {
-        const response = await fetch(`http://192.168.29.67:3000/getOrderDetails?shopID=${shopID}&custPhoneNumber=${custPhoneNumber}`);
+        // Fetch order details with route parameters
+        const response = await fetch(`http://192.168.29.67:3000/api/v1/customerOrders/getOrderDetails/${shopID}/${custPhoneNumber}`);
         if (!response.ok) {
           throw new Error('Failed to fetch order details.');
         }
         const data = await response.json();
         console.log('Fetched Order Details:', data);  // Log the data to inspect structure
-        setOrders(data);  // Set data to orders state
+        setOrders(data.orders);  // Set data to orders state; adjust based on the structure of the response
       } catch (error) {
         console.error('Error fetching order details:', error);
         Alert.alert('Failed to fetch order details. Please try again.');
       }
     };
-
+  
     fetchOrderDetails();
-  }, [shopID, custPhoneNumber]);
+  }, [shopID, custPhoneNumber]);  // Add dependencies for `shopID` and `custPhoneNumber`
+  
+    
 
   if (orders.length === 0) {
     return (

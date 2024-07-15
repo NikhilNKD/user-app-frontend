@@ -1,25 +1,24 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { CustomerContext } from '../../../../Context/ContextApi'; // Adjust the import based on your context setup
 
-const Orders = ({route}) => {
+const Orders = ({ route }) => {
   const navigation = useNavigation();
-  //const { custPhoneNumber } = useContext(CustomerContext);  // Fetch phone number from context
-  const {custPhoneNumber}  = route.params;
+  const { custPhoneNumber } = route.params;
   const [shops, setShops] = useState([]);
 
   useEffect(() => {
     const fetchShops = async () => {
       try {
-        const response = await fetch(`http://192.168.29.67:3000/getCustomerStores?custPhoneNumber=${custPhoneNumber}`);
-        console.log('Response Status:', response.status);  // Log response status
+        console.log('Fetching orders for phone number:', custPhoneNumber);  // Verify phone number
+        const response = await fetch(`http://192.168.29.67:3000/api/v1/customerOrders/getCustomerOrder/${custPhoneNumber}`);
+        console.log('Response Status:', response.status);  // Check the response status
         if (!response.ok) {
           throw new Error('Failed to fetch shops.');
         }
         const data = await response.json();
-        console.log('Fetched Shops:', data);  // Log the data to inspect structure
-        setShops(data);  // Set data to shops state
+        console.log('Fetched Orders:', data);  // Log data to inspect
+        setShops(groupOrdersByShop(data.orders));  // Group orders by shopID and set data to shops state
       } catch (error) {
         console.error('Error fetching shops:', error);
         Alert.alert('Failed to fetch shops. Please try again.');
@@ -28,18 +27,33 @@ const Orders = ({route}) => {
 
     if (custPhoneNumber) {
       fetchShops();
+    } else {
+      console.error('custPhoneNumber is undefined');
     }
   }, [custPhoneNumber]);
 
+  const groupOrdersByShop = (orders) => {
+    if (!orders || orders.length === 0) return [];
+    const grouped = orders.reduce((acc, order) => {
+      const { shopID } = order;
+      if (!acc[shopID]) {
+        acc[shopID] = [];
+      }
+      acc[shopID].push(order);
+      return acc;
+    }, {});
+    return Object.entries(grouped).map(([shopID, orders]) => ({ shopID, orders }));
+  };
+
   const renderItem = ({ item }) => {
-    const { shopID } = item;
+    const { shopID, orders } = item;
 
     return (
       <View style={styles.shopContainer}>
         <Text style={styles.shopHeader}>Shop: {shopID}</Text>
         <TouchableOpacity
           style={styles.viewOrderButton}
-          onPress={() => navigation.navigate('ViewOrder', { shopID, custPhoneNumber })}
+          onPress={() => navigation.navigate('ViewOrder', { shopID, custPhoneNumber, orders })}
         >
           <Text style={styles.viewOrderButtonText}>View Order</Text>
         </TouchableOpacity>
@@ -58,7 +72,7 @@ const Orders = ({route}) => {
         style={styles.searchShopsButton}
         onPress={() => navigation.navigate('SearchShops')}
       >
-        <Text style={styles.searchShopsButtonText}>Back to search shops</Text>
+        <Text style={styles.searchShopsButtonText}>Back to search shops{custPhoneNumber}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -71,6 +85,9 @@ const styles = StyleSheet.create({
   },
   shopContainer: {
     marginBottom: 16,
+    padding: 16,
+    borderRadius: 8,
+    backgroundColor: '#f8f9fa',
   },
   shopHeader: {
     fontSize: 18,
@@ -81,6 +98,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#007BFF',
     padding: 10,
     borderRadius: 8,
+    marginTop: 8,
   },
   viewOrderButtonText: {
     color: '#fff',
