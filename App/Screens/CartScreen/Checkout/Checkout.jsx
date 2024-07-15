@@ -23,7 +23,7 @@ const Checkout = ({ route }) => {
       for (const phoneNumber of shopkeeperPhones) {
         try {
           console.log(`Fetching details for phone number: ${phoneNumber}`); // Debugging line
-          const response = await fetch(`http://192.168.29.67:3000/getShopkeeperDetails?phoneNumber=${phoneNumber}`);
+          const response = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeperDetails/details/${phoneNumber}`);
           if (response.ok) {
             const data = await response.json();
             console.log('Fetched shopkeeper details:', data); // Debugging line
@@ -50,40 +50,45 @@ const Checkout = ({ route }) => {
       for (const [shopID, items] of Object.entries(groupedCartItems)) {
         const shopkeeperPhoneNumber = items[0]?.shopkeeperPhoneNumber;
         const shopkeeperName = shopkeeperDetails[shopkeeperPhoneNumber]?.shopkeeperName || items[0]?.shopkeeperName;
-
+  
         // Calculate total price for the current shop
         const shopTotalPrice = items.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0);
-
-        const response = await fetch('http://192.168.29.67:3000/saveOrder', {
+  
+        const orderData = {
+          custName: firstCustomerName,
+          cartItems: items,
+          totalPrice: shopTotalPrice, // Total price for the current shop
+          selectedDate,
+          selectedTime,
+          shopID, // Current shopID from the loop (store name)
+          shopkeeperName,
+          custPhoneNumber,
+          shopkeeperPhoneNumber,
+        };
+  
+        const response = await fetch('http://192.168.29.67:3000/api/v1/customerOrders/saveOrder', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            custName: firstCustomerName,
-            cartItems: items,
-            totalPrice: shopTotalPrice, // Total price for the current shop
-            selectedDate,
-            selectedTime,
-            shopID, // Current shopID from the loop (store name)
-            shopkeeperName,
-            custPhoneNumber,
-            shopkeeperPhoneNumber,
-          }),
+          body: JSON.stringify(orderData),
         });
-
+  
         if (!response.ok) {
           throw new Error('Failed to save the order.');
         }
+  
+        console.log('Order data:', orderData);
+        Alert.alert('Order placed successfully!');
       }
-
+  
       navigation.navigate('Pay', { custPhoneNumber: custPhoneNumber }); // Navigate to the payment screen
     } catch (error) {
       console.error('Error saving order:', error);
       Alert.alert('Failed to save the order. Please try again.');
     }
   };
-
+  
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Header section */}
