@@ -18,19 +18,30 @@ export default function ShopkeeperProductHome({ route }) {
 
     const fetchShopkeeperDetails = async () => {
         try {
-            const response = await fetch(`http://192.168.29.67:3000/shopkeeperProductHomeDetails/${phoneNumber}`);
+            console.log('Fetching shopkeeper details for phoneNumber:', phoneNumber);
+            const response = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeperDetails/productHome/${phoneNumber}`);
+        
+            console.log('Response Status:', response.status);
+            console.log('Response Headers:', response.headers);
+        
+            const text = await response.text();
+            console.log('Response Text:', text);
+        
+            const data = JSON.parse(text);
+            console.log('Parsed Data:', data);
+        
             if (response.ok) {
-                const data = await response.json();
-                setShopkeeperName(data.shopkeeperName);
+                setShopkeeperName(data.data.shopkeeperName);
                 setShopkeeperPhoneNumber(route.params.phoneNumber);
-                setSelectedSubCategory(data.selectedSubCategory);
+                setSelectedSubCategory(data.data.selectedSubCategory);
             } else {
-                console.error('Failed to fetch shopkeeper details:', response.statusText);
+                console.error('Failed to fetch shopkeeper details:', data.message || response.statusText);
             }
         } catch (error) {
             console.error('Error fetching shopkeeper details:', error);
         }
     };
+    
 
     const buttonsData = [
         { id: 6, title: 'My Products', screen: 'ShopkeeperMyProducts' },

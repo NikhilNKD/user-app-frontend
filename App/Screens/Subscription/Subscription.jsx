@@ -22,7 +22,7 @@ export default function Subscription({route}) {
            
 
             <View style={styles.bulletPoints}>
-                <Text style={styles.details}> 12 Months + 2 Months FREE{selectedCategory}</Text>
+                <Text style={styles.details}> 12 Months + 2 Months FREE{selectedCategoryType}</Text>
                 <Text style={styles.bullet}>• Per Day Cost Less Than a Cup of Tea</Text>
                 <Text style={styles.bullet}>• Get your OWN Online Shop.</Text>
                 <Text style={styles.bullet}>• Manage Your Inventory.</Text>

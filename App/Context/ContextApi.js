@@ -30,26 +30,31 @@ export const CartProvider = ({ children }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [shopPhoneNumber, setShopPhoneNumber] = useState('');
   const [customerPincode, setCustomerPincode] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Default to false
+  const [isRegistered, setIsRegistered] = useState(false); 
 
   // Function to add item to cart for a specific customer
-  const addToCart = (custPhoneNumber, product, shopkeeperName, shopkeeperPhoneNumber, shopID) => {
+  const addToCart = (custPhoneNumber, item, shopkeeperName, shopkeeperPhoneNumber, shopID, type = 'product') => {
     const updatedCartItems = { ...cartItems };
   
     if (!updatedCartItems[custPhoneNumber]) {
       updatedCartItems[custPhoneNumber] = [];
     }
   
-    const existingItemIndex = updatedCartItems[custPhoneNumber].findIndex(item => item.id === product.id && item.shopID === shopID);
+    const existingItemIndex = updatedCartItems[custPhoneNumber].findIndex(cartItem => 
+      cartItem.id === item.id && cartItem.shopID === shopID && cartItem.type === type
+    );
   
     if (existingItemIndex !== -1) {
       updatedCartItems[custPhoneNumber][existingItemIndex].quantity++;
     } else {
-      updatedCartItems[custPhoneNumber].push({ 
-        ...product, 
-        quantity: 1, 
-        shopkeeperName: shopkeeperName, 
-        shopkeeperPhoneNumber: shopkeeperPhoneNumber,
-        shopID: shopID // Add shopID to the product object
+      updatedCartItems[custPhoneNumber].push({
+        ...item,
+        quantity: 1,
+        shopkeeperName,
+        shopkeeperPhoneNumber,
+        shopID,
+        type
       });
     }
   
@@ -142,6 +147,10 @@ export const CartProvider = ({ children }) => {
           setShopPhoneNumber,
           customerPincode, // Add customerPincode
           setCustomerPincode, // Add setCustomerPincode function
+          isLoggedIn,
+          setIsLoggedIn,
+          isRegistered,
+          setIsRegistered
         }}
       >
         {children}

@@ -4,20 +4,18 @@ import { useCart, useCustomer } from '../../Context/ContextApi';
 import { useNavigation } from '@react-navigation/native';
 
 const CartScreen = () => {
-  const { cartItems, removeFromCart, setCartItems, custPhoneNumber,shopID } = useCart();
+  const { cartItems, removeFromCart, setCartItems, custPhoneNumber, shopID } = useCart();
   const { firstCustomerName, shopkeeperPhoneNumber } = useCustomer();
   const navigation = useNavigation();
 
   const renderItem = ({ item }) => (
     <View style={styles.itemContainer}>
       <Text style={styles.itemName}>{item.main_category}</Text>
-      <Text>Product Name: {item.product_name}</Text>
-      <Text>Brand: {item.brand_name}</Text>
+      <Text>Name: {item.type === 'service' ? item.subServiceName : item.product_name}</Text>
+      {item.type !== 'service' && <Text>Brand: {item.brand_name}</Text>}
       <Text>Store Name: {item.shopID}</Text>
-      <Text>Weight: {item.weight}</Text>
-      
-      <Text>Phonenumber: {item.shopkeeperPhoneNumber}</Text>
-      
+      {item.type !== 'service' && <Text>Weight: {item.weight}</Text>}
+      <Text>Phone number: {item.shopkeeperPhoneNumber}</Text>
       <View style={styles.quantityContainer}>
         <TouchableOpacity onPress={() => updateQuantity(item.id, -1)} style={styles.quantityButton}>
           <Text style={styles.quantityButtonText}>-</Text>
@@ -52,7 +50,7 @@ const CartScreen = () => {
     let totalPrice = 0;
     if (cartItems[custPhoneNumber]) {
       cartItems[custPhoneNumber].forEach(item => {
-        totalPrice += item.price * item.quantity;
+        totalPrice += item.type === 'service' ? item.subServicePrice * item.quantity : item.price * item.quantity;
       });
     }
     return totalPrice.toFixed(2);
@@ -62,14 +60,13 @@ const CartScreen = () => {
     navigation.navigate('Checkout', {
       totalPrice: calculateTotalPrice(),
       cartItems: cartItems[custPhoneNumber],
-      firstCustomerName: firstCustomerName,
-      custPhoneNumber: custPhoneNumber,
-      shopkeeperPhoneNumber: shopkeeperPhoneNumber,
-      shopID: shopID  // Add shopID here to pass it to Checkout
+      firstCustomerName,
+      custPhoneNumber,
+      shopkeeperPhoneNumber,
+      shopID
     });
   };
 
-  // VirtualizedList functions
   const getItemCount = () => {
     return cartItems[custPhoneNumber] ? cartItems[custPhoneNumber].length : 0;
   };
@@ -84,8 +81,6 @@ const CartScreen = () => {
         <Image source={require("../../../assets/logo.png")} style={styles.storeImage} />
         <View style={styles.headerText}>
           <Text style={styles.welcomeText}>Welcome: {firstCustomerName}</Text>
-         
-        
         </View>
       </View>
       {cartItems[custPhoneNumber] && cartItems[custPhoneNumber].length === 0 ? (

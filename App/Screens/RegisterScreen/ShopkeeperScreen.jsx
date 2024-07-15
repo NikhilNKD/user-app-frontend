@@ -3,9 +3,7 @@ import { View, Text, TextInput, StyleSheet, Button, ScrollView, Dimensions, Imag
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker';
-import { Camera } from 'expo-camera';
-import { ImageManipulator } from 'expo-image-manipulator';
-import axios from 'axios';
+ 
 
 
 
@@ -35,6 +33,7 @@ export default function ShopkeeperScreen({ route }) {
     const [selectedSubCategoryId, setSelectedSubCategoryId] = useState('');
     const [selectedCategoryType, setSelectedCategoryType] = useState('');
     const [deliverToHome, setDeliverToHome] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
    
 
     const { phoneNumber , userType } = route.params || {};
@@ -51,34 +50,47 @@ export default function ShopkeeperScreen({ route }) {
             }
         })();
     }, []);
-
+  
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch('http://192.168.29.67:3000/categories'); // Change to your server's endpoint
+                const response = await fetch('http://192.168.29.67:3000/api/v1/category/categories');
                 if (response.ok) {
-                    const data = await response.json();
-                    setCategories(data);
+                    const responseData = await response.json();
+                    console.log('Fetched categories:', responseData);
+                    if (responseData.success) {
+                        setCategories(responseData.data); // Ensure data has `type` field
+                    } else {
+                        console.error('Failed to fetch categories:', responseData.message);
+                    }
                 } else {
-                    console.error('Failed to fetch categories');
+                    console.error('Failed to fetch categories:', response.statusText);
                 }
             } catch (error) {
                 console.error('Error fetching categories:', error);
+            } finally {
+                setIsLoading(false); // Set loading to false after fetching
             }
         };
         fetchCategories();
     }, []);
+    
 
     useEffect(() => {
         const fetchSubCategories = async () => {
             try {
                 if (selectedCategoryId) {
-                    const response = await fetch(`http://192.168.29.67:3000/subcategories/${selectedCategoryId}`);
+                    const response = await fetch(`http://192.168.29.67:3000/api/v1/category/subcategories/${selectedCategoryId}`);
                     if (response.ok) {
-                        const data = await response.json();
-                        setSubCategories(data);
+                        const responseData = await response.json();
+                        console.log('Fetched subcategories:', responseData);
+                        if (responseData.success) {
+                            setSubCategories(responseData.data);
+                        } else {
+                            console.error('Failed to fetch sub-categories:', responseData.message);
+                        }
                     } else {
-                        console.error('Failed to fetch sub-categories');
+                        console.error('Failed to fetch sub-categories:', response.statusText);
                     }
                 }
             } catch (error) {
@@ -88,6 +100,7 @@ export default function ShopkeeperScreen({ route }) {
 
         fetchSubCategories();
     }, [selectedCategoryId]);
+    
     
     const checkSalesAssociateNumber = async (number) => {
         try {
@@ -103,6 +116,18 @@ export default function ShopkeeperScreen({ route }) {
             console.error('Error checking sales associate:', error);
             Alert.alert('Error', 'Failed to check sales associate. Please try again later.');
             return false;
+        }
+    };
+    
+    const handleCategoryChange = (itemValue) => {
+        setSelectedCategory(itemValue);
+        const category = categories.find(cat => cat.name === itemValue);
+        if (category) {
+            setSelectedCategoryId(category.id);
+            setSelectedCategoryType(category.type); // Set the type of the category
+        } else {
+            setSelectedCategoryId('');
+            setSelectedCategoryType(''); // Clear the type if category not found
         }
     };
     
@@ -124,10 +149,9 @@ export default function ShopkeeperScreen({ route }) {
             shopBanner,
             profilePicture,
             deliverToHome,
-            salesAssociateNumber: salesAssociateNumber.trim() === '' ? null : salesAssociateNumber // Set to null if empty
+            salesAssociateNumber: salesAssociateNumber.trim() === '' ? null : salesAssociateNumber,
         };
     
-        // If salesAssociateNumber is provided, validate it
         if (salesAssociateNumber.trim() !== '') {
             const isValid = await checkSalesAssociateNumber(salesAssociateNumber);
             if (!isValid) {
@@ -137,7 +161,7 @@ export default function ShopkeeperScreen({ route }) {
         }
     
         try {
-            const response = await fetch('http://192.168.29.67:3000/shopkeeperRegister', {
+            const response = await fetch('http://192.168.29.67:3000/api/v1/auth/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -146,17 +170,20 @@ export default function ShopkeeperScreen({ route }) {
             });
     
             const responseData = await response.json();
-            alert("Shopkeeper registered");
-            console.log(responseData.message);
-    
-            navigation.navigate('Subscription', {
-                phoneNumber: phoneNumber,
-                selectedCategory: selectedCategory,
-                selectedSubCategory: selectedSubCategory,
-                selectedSubCategoryId: selectedSubCategoryId,
-                selectedCategoryType: selectedCategoryType,
-                userType: userType
-            });
+            if (response.ok) {
+                alert("Shopkeeper registered");
+                navigation.navigate('Subscription', {
+                    phoneNumber: phoneNumber,
+                    selectedCategory: selectedCategory,
+                    selectedSubCategory: selectedSubCategory,
+                    selectedSubCategoryId: selectedSubCategoryId,
+                    selectedCategoryType: selectedCategoryType,
+                    userType: userType
+                });
+            } else {
+                console.error('Registration error:', responseData);
+                Alert.alert('Error', responseData.message || 'Failed to register shopkeeper. Please try again later.');
+            }
         } catch (error) {
             console.error('Error registering shopkeeper:', error);
             Alert.alert('Error', 'Failed to register shopkeeper. Please try again later.');
@@ -210,7 +237,7 @@ export default function ShopkeeperScreen({ route }) {
                 aspect: [4, 3],
                 quality: 1,
             });
-
+    
             if (!result.cancelled) {
                 setImage(result.uri);
             }
@@ -223,7 +250,8 @@ export default function ShopkeeperScreen({ route }) {
     return (
         <ScrollView contentContainerStyle={styles.scrollViewContent} keyboardShouldPersistTaps="handled">
             <View style={styles.container}>
-                <Text style={styles.heading}>Shopkeeper Registration</Text>
+                <Text style={styles.heading}>Shopkeeper Registration{selectedCategoryType}
+                </Text>
                 <View style={styles.inputContainer}>
                     <Text style={styles.label}>Phone Number</Text>
                     <TextInput
@@ -317,49 +345,42 @@ export default function ShopkeeperScreen({ route }) {
                          </View>
 
                 
+                         <View style={styles.inputContainer}>
+                <Text style={styles.label}>Your Shop Category*</Text>
+                <Picker
+                    selectedValue={selectedCategory}
+                    onValueChange={handleCategoryChange}
+                    style={styles.picker}
+                >
+                    <Picker.Item label="Select a category" value="" />
+                    {categories.map((category) => (
+                        <Picker.Item key={category.id} label={category.name} value={category.name} />
+                    ))}
+                </Picker>
+            </View>
+
+                
+            {selectedCategoryId == '5' && (
                 <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Your Shop Category*</Text>
+                    <Text style={styles.label}>Type of shop</Text>
                     <Picker
-                        selectedValue={selectedCategory}
+                        selectedValue={selectedSubCategory}
                         onValueChange={(itemValue) => {
-                            setSelectedCategory(itemValue);
-                            // Find the ID and type of the selected category
-                            const category = categories.find(cat => cat.name === itemValue);
-                            setSelectedCategoryId(category ? category.id : '');
-                            setSelectedCategoryType(category ? category.type : ''); // Update the selected category type state
+                            setSelectedSubCategory(itemValue);
+                            const subCategory = subCategories.find(sub => sub.name === itemValue);
+                            setSelectedSubCategoryId(subCategory ? subCategory.id : '');
                         }}
                         style={styles.picker}
+                        enabled={!!subCategories.length}
                     >
-                        {categories.map((category, index) => (
-                            <Picker.Item key={index} label={category.name} value={category.name} />
+                        <Picker.Item label="Select a subcategory" value="" />
+                        {subCategories.map((subCategory) => (
+                            <Picker.Item key={subCategory.id} label={subCategory.name} value={subCategory.name} />
                         ))}
                     </Picker>
                 </View>
-                
-                {selectedCategory === 'Salon Shop' && (
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Type of shop</Text>
-                        <Picker
-                            selectedValue={selectedSubCategory}
-                            onValueChange={(itemValue) => {
-                                // Update the selected subcategory
-                                setSelectedSubCategory(itemValue);
-                                
-                                // Find the subcategory object that matches the selected subcategory name
-                                const subCategory = subCategories.find(sub => sub.sub_category === itemValue);
-                                
-                                // Update the selected subcategory ID
-                                setSelectedSubCategoryId(subCategory ? subCategory.id : '');
-                            }}
-                            style={styles.picker}
-                            enabled={!!subCategories.length} // Enable or disable the picker based on the availability of subcategories
-                        >
-                            {subCategories.map((subCategory, index) => (
-                                <Picker.Item key={index} label={subCategory.sub_category} value={subCategory.sub_category} />
-                            ))}
-                        </Picker>
-                    </View>
-                )}
+            )}
+
 
                 <View style={styles.inputContainer}>
                     <Button title="Add Shop Banner" onPress={() => pickImage(setShopBanner)} />

@@ -49,7 +49,7 @@ export default function SearchShops({ route }) {
     }
 
     try {
-      const response = await fetch('http://192.168.29.67:3000/updatePincode', {
+      const response = await fetch("http://192.168.29.67:3000/api/v1/pincode/updatePincode", {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ export default function SearchShops({ route }) {
 
   const fetchCustomerDetails = async () => {
     try {
-      const response = await fetch(`http://192.168.29.67:3000/customerDetails/${phoneNumber}`);
+      const response = await fetch(`http://192.168.29.67:3000/api/v1/customer/customerDetails/${phoneNumber}`);
       const data = await response.json();
       setNewPincode(data.pincode);
     } catch (error) {
@@ -97,7 +97,7 @@ export default function SearchShops({ route }) {
  const fetchShopsInArea = async (customerPinode) => {
   setLoading(true);
   try {
-    const response = await fetch(`http://192.168.29.67:3000/shopsInArea/${customerPinode}`);
+    const response = await fetch(`http://192.168.29.67:3000/api/v1/pincode/shopsInArea/${customerPinode}`);
     const data = await response.json();
 
     let filteredData = data;
@@ -174,7 +174,7 @@ const handleShopPress = (shop) => {
   
   const addPreferredShop = async (shop) => {
     try {
-      const response = await fetch('http://192.168.29.67:3000/addPreferredShop', {
+      const response = await fetch('http://192.168.29.67:3000/api/v1/preferredShops/addPreferredShop', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -203,7 +203,7 @@ const handleShopPress = (shop) => {
 
   const removePreferredShop = async (shopID) => {
     try {
-      const response = await fetch('http://192.168.29.67:3000/removePreferredShop', {
+      const response = await fetch('http://192.168.29.67:3000/api/v1/preferredShops/removePreferredShop', {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

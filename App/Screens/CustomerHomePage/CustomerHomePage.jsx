@@ -9,37 +9,40 @@ import {useCustomer} from '../../Context/ContextApi';
 
 
 export default function CustomerHomePage({ route }) {
-  const {  pincode , custPhoneNumber,userType ,   name  , phoneNumber  } = route.params || {};
+  const { pincode, custPhoneNumber, userType, name, phoneNumber } = route.params || {};
   const [customerDetails, setCustomerDetails] = useState(null);
- 
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [shopID, setShopID] = useState('');
   const { firstCustomerName, setFirstCustomerName } = useCustomer(); // Use useCustomer hook here
- const [customerPinode , setCustomerPincode] = useState();
+  const [customerPincode, setCustomerPincode] = useState();
   const navigation = useNavigation();
 
   const navigateToScreen = (screenName, params) => {
-    navigation.navigate(screenName, params , selectedCategory);
+    navigation.navigate(screenName, params, selectedCategory);
   };
-  
-  
+
   const handleCategorySelect = (category) => {
     setSelectedCategory(category);
-   
   };
-  
-  
+
+ 
   useEffect(() => {
     const fetchCustomerDetails = async () => {
       try {
-        const response = await fetch(`http://192.168.29.67:3000/customerDetails/${phoneNumber}`);
+        console.log(`Fetching data for phone number: ${phoneNumber}`); // Debugging statement
+        const response = await fetch(`http://192.168.29.67:3000/api/v1/customer/customerDetails/${phoneNumber}`);
         const data = await response.json();
-        setCustomerDetails(data);
-        setFirstCustomerName(data.name); // Set the customer's name
-        setShopID(data.shop_id); // Set the customer's shop ID
-        setCustomerPincode(data.pincode);
-        
-        
+        console.log('Fetched Customer Details:', data); // Debugging statement
+
+        // Check if data and data.data are valid before setting state
+        if (data && data.data) {
+          setCustomerDetails(data.data);
+          setFirstCustomerName(data.data.name); // Set the customer's name
+          setShopID(data.data.shop_id); // Set the customer's shop ID
+          setCustomerPincode(data.data.pincode); // Set the customer's pincode
+        } else {
+          console.error('Error: Invalid data structure');
+        }
       } catch (error) {
         console.error('Error fetching customer details:', error);
       }
@@ -50,6 +53,7 @@ export default function CustomerHomePage({ route }) {
     }
   }, [phoneNumber]);
 
+
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
@@ -59,11 +63,11 @@ export default function CustomerHomePage({ route }) {
             style={styles.image}
           />
         </View>
-        <Text style={styles.welcomeText}>Welcome,{firstCustomerName}</Text>
+        <Text style={styles.welcomeText}>Welcome, {firstCustomerName || 'Loading...'}</Text>
 
         <View style={styles.cardRow}>
           <View style={styles.card}>
-            <TouchableOpacity onPress={() => navigateToScreen('PrefferedShops', {  firstcustomerName: firstCustomerName, shopID: shopID  , phoneNumber:phoneNumber})}>
+            <TouchableOpacity onPress={() => navigateToScreen('PrefferedShops', { firstcustomerName: firstCustomerName, shopID: shopID, phoneNumber: phoneNumber })}>
               <View style={styles.cardContent}>
                 <View style={styles.iconWrapper}>
                   <FontAwesome5 name="shopping-cart" size={50} color="black" style={styles.icon} />
@@ -74,7 +78,7 @@ export default function CustomerHomePage({ route }) {
           </View>
 
           <View style={styles.card}>
-            <TouchableOpacity onPress={() => navigateToScreen('Orders'  ,{   firstcustomerName: firstCustomerName, shopID: shopID,    userType:userType,custPhoneNumber:phoneNumber })}>
+            <TouchableOpacity onPress={() => navigateToScreen('Orders', { firstcustomerName: firstCustomerName, shopID: shopID, userType: userType, custPhoneNumber: phoneNumber })}>
               <View style={styles.cardContent}>
                 <View style={styles.iconWrapper}>
                   <MaterialIcons name="menu-book" size={50} color="black" style={styles.icon} />
@@ -87,7 +91,7 @@ export default function CustomerHomePage({ route }) {
 
         <View style={styles.cardRow}>
           <View style={styles.card}>
-            <TouchableOpacity onPress={() => navigateToScreen('MyAddress' , {   firstcustomerName: firstCustomerName, shopID: shopID,  phoneNumber:phoneNumber , userType:userType }) }>
+            <TouchableOpacity onPress={() => navigateToScreen('MyAddress', { firstcustomerName: firstCustomerName, shopID: shopID, phoneNumber: phoneNumber, userType: userType })}>
               <View style={styles.cardContent}>
                 <View style={styles.iconWrapper}>
                   <MaterialCommunityIcons name="google-maps" size={50} color="black" style={styles.icon} />
@@ -98,7 +102,7 @@ export default function CustomerHomePage({ route }) {
           </View>
 
           <View style={styles.card}>
-            <TouchableOpacity onPress={() => navigateToScreen('SearchShops', {   firstcustomerName: firstCustomerName, shopID: shopID,  userType:userType , phoneNumber:phoneNumber , selectedCategory:selectedCategory  , customerPinode:customerPinode })}>
+            <TouchableOpacity onPress={() => navigateToScreen('SearchShops', { firstcustomerName: firstCustomerName, shopID: shopID, userType: userType, phoneNumber: phoneNumber, selectedCategory: selectedCategory, customerPinode: customerPincode })}>
               <View style={styles.cardContent}>
                 <View style={styles.iconWrapper}>
                   <MaterialCommunityIcons name="shopping-search" size={50} color="black" style={styles.icon} />

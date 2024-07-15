@@ -6,14 +6,14 @@ import { AntDesign } from '@expo/vector-icons';
 
 export default function PreferredShops({ route }) {
   const [shops, setShops] = useState([]);
-  const { phoneNumber } = route.params || {};
+  const { phoneNumber,shopID } = route.params || {};
   const navigation = useNavigation();
 
   useEffect(() => {
     const fetchPreferredShops = async () => {
       try {
-        const response = await axios.get(`http://192.168.29.67:3000/api/preferred_shops/${phoneNumber}`);
-        setShops(response.data);
+        const response = await axios.get(`http://192.168.29.67:3000/api/v1/preferredShops/getPreferredShops/${phoneNumber}`);
+        setShops(response.data.data); // Assuming `data` is the actual array of shops
       } catch (error) {
         console.error('Error fetching preferred shops:', error);
       }
@@ -34,7 +34,7 @@ export default function PreferredShops({ route }) {
 
   const handleDeleteShop = async (shopID) => {
     try {
-      const response = await axios.delete('http://192.168.29.67:3000/removePreferredShop', {
+      const response = await axios.delete('http://192.168.29.67:3000/api/v1/preferredShops/removePreferredShop', {
         data: { customerPhoneNumber: phoneNumber, shopID: shopID }
       });
 
@@ -56,13 +56,14 @@ export default function PreferredShops({ route }) {
       <View style={styles.shopContainer}>
         <View style={styles.shopInfo}>
           <Text style={styles.shopName}>{item.shopkeeperName}</Text>
-          <Text>Shop ID: {item.shopID}</Text>
           <Text>Category: {item.selectedCategory}</Text>
           <Text>Type: {item.shopType}</Text>
           <Text>Phone: {item.phoneNumber}</Text>
           <Text>Pincode: {item.pincode}</Text>
           <Text>Created At: {item.createdAt}</Text>
+          
           <Text>Deliver to Home:{item.deliverToHome ? "Yes" : "No"}</Text>
+        
         </View>
         <TouchableOpacity onPress={() => handleDeleteShop(item.shopID)}>
           <AntDesign name="delete" size={24} color="red" />
@@ -73,7 +74,7 @@ export default function PreferredShops({ route }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Preferred Shops</Text>
+      <Text style={styles.title}>Preferred Shops{phoneNumber}{shopID}</Text>
       <FlatList
         data={shops}
         renderItem={renderShop}

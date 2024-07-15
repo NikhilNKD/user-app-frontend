@@ -76,7 +76,7 @@ const handleNavigation = () => {
 
       {/* Button */}
       <TouchableOpacity style={styles.button} onPress={handleNavigation}  >
-        <Text style={styles.buttonText}>Customize{selectedCategory}</Text>
+        <Text style={styles.buttonText}>Customize{selectedCategoryType}</Text>
       </TouchableOpacity>
     </View>
   );

@@ -27,10 +27,8 @@ const PrivacyCheckbox = ({ onCheckboxChange }) => {
 }
 
 export default function CustomerScreen({ route }) {
-    const { setShopID, setCustomerName, setCustPhoneNumber, name: customerName   } = useContext(CustomerContext);
-    
+    const { setShopID, setCustomerName, setCustPhoneNumber } = useContext(CustomerContext);
     const [name, setName] = useState('');
-    
     const [pincode, setPincodeLocal] = useState(''); // Local state for pincode
     const [shopID, setShopId] = useState('');
     const [state, setStateLocal] = useState(''); // Local state for state
@@ -39,18 +37,18 @@ export default function CustomerScreen({ route }) {
     const [requiredFields, setRequiredFields] = useState({});
     const [formSubmitted, setFormSubmitted] = useState(false);
     const [submitted, setSubmitted] = useState(false);
-    const [isChecked, setIsChecked] = useState(false); // Stat0 e for the checkbox
+    const [isChecked, setIsChecked] = useState(false); // State for the checkbox
     const { phoneNumber, userType } = route.params || {};
-    
     const navigation = useNavigation();
+
     const handleSubmit = () => {
         setSubmitted(true);
-    
+
         if (!name.trim() || !pincode.trim() || !state.trim() || !city.trim() || !address.trim() || !isChecked) {
             alert("Please fill in all required fields and agree to the Privacy Policy.");
             return;
         }
-    
+
         // Prepare the data for API request
         const formData = {
             name,
@@ -59,16 +57,11 @@ export default function CustomerScreen({ route }) {
             city,
             address,
             phoneNumber,
+            shopID, // shopID will be the phoneNumber of the shopkeeper
         };
 
-        // Include shop ID if provided
-        if (shopID.trim() !== '') {
-            formData.shopID = shopID;
-            setShopID(shopID); // Update shopID in the context
-        }
-
         // Call the API to register the user
-        fetch('http://192.168.29.67:3000/register', {
+        fetch('http://192.168.29.67:3000/api/v1/auth/customer', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -77,6 +70,9 @@ export default function CustomerScreen({ route }) {
         })
         .then(response => {
             if (!response.ok) {
+                if (response.status === 404) {
+                    throw new Error('ShopID not found');
+                }
                 throw new Error('Network response was not ok');
             }
             return response.json();
@@ -86,14 +82,11 @@ export default function CustomerScreen({ route }) {
             setCustomerName(name); // Set customerName globally
             setCustPhoneNumber(phoneNumber);
             alert('User registered successfully');
-            
-            navigation.navigate('CustomerHomePage', { phoneNumber: phoneNumber, userType: userType, name: name, shopID: shopID , pincode:pincode , name:name });
-          
-              
-            
+
+            navigation.navigate('CustomerHomePage', { phoneNumber: phoneNumber, userType: userType, name: name, shopID: shopID, pincode: pincode, name: name });
         })
         .catch(error => {
-            alert('User already registered.');
+            alert(error.message);
         });
     };
 
@@ -185,37 +178,38 @@ export default function CustomerScreen({ route }) {
                     <Text style={styles.label}>City *</Text>
                     <TextInput
                         style={[styles.input, !requiredFields.city && submitted && styles.requiredInput]}
-                        placeholder="Dehradun"
+                        placeholder="Haridwar"
                         value={city}
                         onChangeText={(value) => handleInputChange(value, 'city')}
                     />
                 </View>
                 <View style={styles.inputContainer}>
-                    <Text style={styles.label}> Complete Address *</Text>
+                    <Text style={styles.label}>Address *</Text>
                     <TextInput
-                        style={[styles.input, { height: windowHeight * 0.1, textAlignVertical: 'top' }, !requiredFields.address && submitted && styles.requiredInput]}
-                        placeholder="Enter your complete address"
+                        style={[styles.input, !requiredFields.address && submitted && styles.requiredInput]}
+                        placeholder="Your Address"
                         value={address}
                         onChangeText={(value) => handleInputChange(value, 'address')}
-                        multiline
                     />
                 </View>
-                <PrivacyCheckbox onCheckboxChange={setIsChecked} />  
+                <PrivacyCheckbox onCheckboxChange={(checked) => setIsChecked(checked)} />
                 <TouchableOpacity onPress={() => navigation.navigate('Privacy')}>
                     <Text style={styles.linkText}>Privacy License</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Conditions')}>
                     <Text style={styles.linkText}>Terms and Conditions</Text>
                 </TouchableOpacity>
-                <Button
-                    title="Submit"
+                <TouchableOpacity
+                    style={styles.button}
                     onPress={handleSubmit}
-                    disabled={!Object.values(requiredFields).every(field => field)}
-                />
+                >
+                    <Text style={styles.buttonText}>Submit</Text>
+                </TouchableOpacity>
             </View>
         </ScrollView>
     );
 }
+
 
 const styles = StyleSheet.create({
     scrollViewContent: {
@@ -284,4 +278,17 @@ const styles = StyleSheet.create({
         textDecorationLine: 'underline',
         marginBottom: 10,
     },
+    button: {
+        backgroundColor: '#007BFF',
+        padding: 20,
+        paddingVertical:16,
+        borderRadius: 8,
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: '#fff',
+        fontSize: 15,
+        fontWeight: '600',
+    },
 });
+//setShopId(value);

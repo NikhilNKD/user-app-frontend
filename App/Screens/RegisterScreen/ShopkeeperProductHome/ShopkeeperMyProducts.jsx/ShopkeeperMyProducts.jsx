@@ -13,9 +13,12 @@ const ShopkeeperMyProducts = ({ route }) => {
 
     const fetchSelectedProducts = async () => {
         try {
-            const response = await fetch(`http://192.168.29.67:3000/myProducts/${shopkeeperPhoneNumber}`);
+            // Fetch the selected products for the shopkeeper
+            const response = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeperProducts/myProducts/${shopkeeperPhoneNumber}`);
             if (response.ok) {
-                const data = await response.json();
+                const { data } = await response.json();
+                
+                // Group the products by category
                 const groupedCategories = groupProductsByCategory(data);
                 setCategories(groupedCategories);
             } else {

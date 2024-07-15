@@ -50,9 +50,10 @@ const Checkout = ({ route }) => {
       for (const [shopID, items] of Object.entries(groupedCartItems)) {
         const shopkeeperPhoneNumber = items[0]?.shopkeeperPhoneNumber;
         const shopkeeperName = shopkeeperDetails[shopkeeperPhoneNumber]?.shopkeeperName || items[0]?.shopkeeperName;
-  
-        const shopTotalPrice = items.reduce((sum, item) => sum + item.price * item.quantity, 0);  // Calculate total price for the current shop
-  
+
+        // Calculate total price for the current shop
+        const shopTotalPrice = items.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0);
+
         const response = await fetch('http://192.168.29.67:3000/saveOrder', {
           method: 'POST',
           headers: {
@@ -61,28 +62,27 @@ const Checkout = ({ route }) => {
           body: JSON.stringify({
             custName: firstCustomerName,
             cartItems: items,
-            totalPrice: shopTotalPrice,  // Total price for the current shop
+            totalPrice: shopTotalPrice, // Total price for the current shop
             selectedDate,
             selectedTime,
-            shopID,  // Current shopID from the loop (store name)
+            shopID, // Current shopID from the loop (store name)
             shopkeeperName,
             custPhoneNumber,
             shopkeeperPhoneNumber,
           }),
         });
-  
+
         if (!response.ok) {
           throw new Error('Failed to save the order.');
         }
       }
-  
-      navigation.navigate('Pay', { custPhoneNumber: custPhoneNumber });  // Navigate to the payment screen
+
+      navigation.navigate('Pay', { custPhoneNumber: custPhoneNumber }); // Navigate to the payment screen
     } catch (error) {
       console.error('Error saving order:', error);
       Alert.alert('Failed to save the order. Please try again.');
     }
   };
-  
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -109,7 +109,7 @@ const Checkout = ({ route }) => {
               {/* Item details */}
               <View style={styles.itemContainer}>
                 <View style={styles.itemDetails}>
-                  <Text style={styles.itemText}>{item.product_name}</Text>
+                  <Text style={styles.itemText}>{item.product_name || item.service_name}</Text>
                   <Text style={styles.itemPrice}>Price: ₹{item.price}</Text>
                   <Text style={styles.itemQuantity}>Quantity: {item.quantity}</Text>
                   <Text style={styles.itemTotal}>Total: ₹{item.price * item.quantity}</Text>
@@ -120,8 +120,6 @@ const Checkout = ({ route }) => {
               {index < groupedCartItems[shopID].length - 1 && <View style={styles.line} />}
             </View>
           ))}
-         
-          
         </View>
       ))}
 

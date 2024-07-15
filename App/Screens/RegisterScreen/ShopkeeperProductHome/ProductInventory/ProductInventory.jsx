@@ -30,11 +30,15 @@ const ProductInventory = ({ route }) => {
     const fetchProducts = async () => {
         try {
             console.log(`Fetching products for category: ${selectedCategory}`);
-            const response = await fetch(`http://192.168.29.67:3000/products/${selectedCategory}`);
+            // Make sure selectedCategory has a valid value
+            if (!selectedCategory) {
+                throw new Error('No category selected');
+            }
+            const response = await fetch(`http://192.168.29.67:3000/api/v1/productInventory/products/${selectedCategory}`);
             if (response.ok) {
-                const data = await response.json();
-                console.log('Fetched products:', data);
-                const productsWithAddedStatus = data.map(product => ({ ...product, added: false }));
+                const result = await response.json();
+                console.log('Fetched products:', result);
+                const productsWithAddedStatus = result.data.map(product => ({ ...product, added: false }));
                 await updateProductsAddedStatus(productsWithAddedStatus);
                 setProducts(productsWithAddedStatus);
                 filterProducts();
@@ -47,7 +51,7 @@ const ProductInventory = ({ route }) => {
             setLoading(false);
         }
     };
-    
+
     const updateProductsAddedStatus = async (products) => {
         try {
             const addedProducts = await AsyncStorage.getItem(`addedProducts_${shopkeeperPhoneNumber}`);
@@ -64,7 +68,7 @@ const ProductInventory = ({ route }) => {
 
     const handleAddProduct = async (productId, index) => {
         try {
-            const response = await fetch('http://192.168.29.67:3000/addProduct', {
+            const response = await fetch('http://192.168.29.67:3000/api/v1/productInventory/addProduct', {  // Updated endpoint path
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -101,6 +105,7 @@ const ProductInventory = ({ route }) => {
 
     const renderItem = ({ item, index }) => (
         <View style={styles.productContainer}>
+            <Text style={styles.productName}>{item.main_category}</Text>
             <Text style={styles.productName}>{item.product_name}</Text>
             <Text style={styles.productBrand}>{item.brand_name}</Text>
             <Text style={styles.productPrice}>Price: ${item.price}</Text>
@@ -124,7 +129,7 @@ const ProductInventory = ({ route }) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.shopkeeperInfo}>Shopkeeper: {shopkeeperName} ({shopkeeperPhoneNumber})</Text>
+            <Text style={styles.shopkeeperInfo}>Shopkeeper: {selectedCategory} ({shopkeeperPhoneNumber})</Text>
             <TextInput
                 style={styles.searchInput}
                 placeholder="Search products..."

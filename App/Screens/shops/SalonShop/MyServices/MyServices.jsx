@@ -4,7 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useCart } from '../../../../Context/ContextApi';
 
 const MyServices = ({ route, navigation }) => {
-    const { phoneNumber, userType, shopID, firstcustomerName, custPhoneNumber } = route.params;
+    const { phoneNumber, userType, shopID, firstcustomerName, custPhoneNumber,shopkeeperName } = route.params;
     const [mainServices, setMainServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const { setGlobalPhoneNumber } = useCart();
@@ -35,9 +35,8 @@ const MyServices = ({ route, navigation }) => {
             <View style={styles.headerContainer}>
                 <Image source={require('../../../../../assets/logo.png')} style={styles.storeImage} />
                 <View style={styles.headerText}>
-                    <Text style={styles.welcomeText}>Welcome: {firstcustomerName}</Text>
-                    <Text style={styles.welcomeText}>Phone: {custPhoneNumber}</Text>
-                    <Text style={styles.shoppingAt}>Shop ID: {phoneNumber}</Text>
+                    <Text style={styles.welcomeText}>Welcome: {shopkeeperName}</Text>
+                    <Text style={styles.welcomeText}>Phone: {phoneNumber}</Text>
                     {userType !== 'customer' && (
                         <Text style={styles.shoppingAt}>Subscription Valid till 10 October 2024</Text>
                     )}
@@ -99,27 +98,22 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 5,
     },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
-    },
     noServicesText: {
         fontSize: 18,
         textAlign: 'center',
         marginTop: 20,
     },
-    mainServiceContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
+    row: {
         justifyContent: 'space-between',
+        marginBottom: 20, // Adjust the space between rows
     },
     item: {
         width: '47%', // Adjust for spacing
         height: 156,
         backgroundColor: '#44C7F4',
         padding: 20,
-        marginBottom: 20,
+        marginBottom: 10, // Space between items vertically
+        marginHorizontal: 5, // Space between items horizontally
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',
@@ -133,5 +127,4 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
 });
-
 export default MyServices;

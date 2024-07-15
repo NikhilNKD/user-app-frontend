@@ -153,7 +153,7 @@ function StackNavigator({ formSubmitted }) {
 }
 
 // Tab Navigator
-function TabNavigator({ formSubmitted }) {
+function TabNavigator() {
   return (
     <Tab.Navigator
       initialRouteName="Home"
