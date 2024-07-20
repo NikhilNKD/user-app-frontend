@@ -18,9 +18,15 @@ export default function SubSalonService({ route, navigation }) {
     useEffect(() => {
         const fetchSubServices = async () => {
             try {
-                const response = await fetch(`http://192.168.29.67:3000/subservices/mainservice/${mainServiceId}`);
-                const data = await response.json();
-                setSubServices(data);
+                const response = await fetch(`http://192.168.29.67:3000/services/subServices/${mainServiceId}`);
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    setSubServices(data);
+                } else {
+                    const text = await response.text();
+                    console.error('Unexpected response format:', text);
+                }
             } catch (error) {
                 console.error('Error fetching sub-services:', error);
             } finally {
@@ -94,7 +100,7 @@ export default function SubSalonService({ route, navigation }) {
             <View style={styles.headerContainer}>
                 <Image source={require('../../../../../../assets/logo.png')} style={styles.storeImage} />
                 <View style={styles.headerText}>
-                    <Text style={styles.welcomeText}>Welcome: {shopkeeperName}</Text>
+                    <Text style={styles.welcomeText}>Welcome: {shopkeeperName}{mainServiceId}</Text>
                     <Text style={styles.shoppingAt}>Shop ID: {phoneNumber}</Text>
                     <Text style={styles.shoppingAt}>Subscription Valid till 10 October 2024</Text>
                 </View>
