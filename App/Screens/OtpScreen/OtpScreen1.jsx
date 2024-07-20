@@ -32,18 +32,22 @@ export default function OtpScreen1() {
             },
             body: JSON.stringify({ phoneNumber }),
         })
-        .then(response => {
-            if (response.ok) {
-                // Phone number is available, navigate to Otp2 with userType 'unregistered'
-                navigation.navigate('Otp2', { phoneNumber, userType: 'unregistered' });
-            } else {
-                return response.json();
+        .then(async response => {
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to check phone number');
             }
+            return response.json();
         })
         .then(data => {
-            if (data) {
+            // Assuming 'data' contains information to determine userType
+            if (data.exists) {
                 // Phone number already exists, navigate to Otp2 with the correct userType
-                navigation.navigate('Otp2', { phoneNumber, userType: data.message.includes('shopkeepers') ? 'shopkeeper' : 'customer' });
+                const userType = data.message.includes('shopkeepers') ? 'shopkeeper' : 'customer';
+                navigation.navigate('Otp2', { phoneNumber, userType });
+            } else {
+                // Phone number is available, navigate to Otp2 with userType 'unregistered'
+                navigation.navigate('Otp2', { phoneNumber, userType: 'unregistered' });
             }
         })
         .catch(error => {
@@ -51,6 +55,7 @@ export default function OtpScreen1() {
             alert('An error occurred while checking the phone number.');
         });
     };
+    
     
 
     return (
