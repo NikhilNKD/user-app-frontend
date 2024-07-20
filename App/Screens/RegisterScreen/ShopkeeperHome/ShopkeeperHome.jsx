@@ -10,7 +10,7 @@ export default function SalonShop({ route }) {
     const [shopkeeperName, setShopkeeperName] = useState('');
     const [shopkeeperPhoneNumber, setShopkeeperPhoneNumber] = useState('');
     const [selectedSubCategory, setSelectedSubCategory] = useState('');
-    const { phoneNumber, selectedCategory, userType } = route.params;
+    const { phoneNumber, selectedCategory } = route.params;
 
     useEffect(() => {
         fetchShopkeeperDetails();
@@ -18,12 +18,15 @@ export default function SalonShop({ route }) {
 
     const fetchShopkeeperDetails = async () => {
         try {
-            const response = await fetch(`http://192.168.29.67:3000/shopkeeperServiceDetails/${route.params.phoneNumber}`);
+            const response = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeper/service/${phoneNumber}`);
             if (response.ok) {
-                const data = await response.json();
+                const { data } = await response.json();
+                console.log('Fetched shopkeeper details:', data);  // Log the fetched data
+    
                 setShopkeeperName(data.shopkeeperName);
-                setShopkeeperPhoneNumber(route.params.phoneNumber);
-                setSelectedSubCategory(data.selectedSubCategory);
+                setShopkeeperPhoneNumber(phoneNumber);
+                setSelectedSubCategory(data.selectedSubCategory || '');
+                
             } else {
                 console.error('Failed to fetch shopkeeper details:', response.statusText);
             }
@@ -31,6 +34,7 @@ export default function SalonShop({ route }) {
             console.error('Error fetching shopkeeper details:', error);
         }
     };
+    
 
     const buttonsData = [
         { id: 6, title: 'My Services', screen: 'MyServices' },
@@ -43,37 +47,17 @@ export default function SalonShop({ route }) {
     ];
 
     const handleButtonPress = (screenName) => {
-        if (screenName === 'Inventory') {
-            navigation.navigate(screenName, {
-                selectedSubCategory: selectedSubCategory,
-                phoneNumber: shopkeeperPhoneNumber,
-                shopkeeperName: shopkeeperName,
-                selectedCategory: selectedCategory
-            });
-        } else if (screenName === 'MyServices') {
-            navigation.navigate('MyServices', {
-                phoneNumber: shopkeeperPhoneNumber,
-                shopkeeperName: shopkeeperName,
-                selectedCategory: selectedCategory,
-                storeImage: require('../../../../assets/logo.png')
-            });
-        } else if (screenName === 'ShopkeeperOrders') {
-            navigation.navigate('ShopkeeperOrders', {
-                shopkeeperPhoneNumber: shopkeeperPhoneNumber,
-                shopkeeperName: shopkeeperName,
-                selectedSubCategory: selectedSubCategory,
-                selectedCategory: selectedCategory
-            });
-        } else {
-            navigation.navigate(screenName);
-        }
+        navigation.navigate(screenName, {
+            selectedSubCategory,
+            phoneNumber: shopkeeperPhoneNumber,
+            shopkeeperName,
+            selectedCategory,
+        });
     };
 
     const handleLogout = async () => {
         try {
-            const sessionToken = await AsyncStorage.getItem('sessionToken');
-            console.log('Session token:', sessionToken);
-
+            await AsyncStorage.removeItem('sessionToken');
             const response = await fetch('http://192.168.29.67:3000/logout', {
                 method: 'POST',
                 headers: {
@@ -83,7 +67,6 @@ export default function SalonShop({ route }) {
             });
 
             if (response.ok) {
-                await AsyncStorage.removeItem('sessionToken');
                 navigation.navigate('HomePage');
             } else {
                 console.error('Logout failed:', response.statusText);
@@ -103,7 +86,7 @@ export default function SalonShop({ route }) {
                     <View style={styles.headerContainer}>
                         <Image source={require('../../../../assets/logo.png')} style={styles.storeImage} />
                         <View style={styles.headerText}>
-                            <Text style={styles.welcomeText}>Welcome: {shopkeeperName}</Text>
+                            <Text style={styles.welcomeText}>Welcome: {shopkeeperName} {selectedCategory}{selectedSubCategory}</Text>
                             <Text style={styles.shoppingAt}>Shop ID: {shopkeeperPhoneNumber}</Text>
                             <Text style={styles.shoppingAt}>Subscription Valid till 10 October 2024</Text>
                         </View>
@@ -122,7 +105,7 @@ export default function SalonShop({ route }) {
                                 trackColor={{ false: '#D3D3D3', true: '#4A90E2' }}
                                 thumbColor={isVisible ? '#318D00' : '#f4f3f4'}
                                 ios_backgroundColor="#3e3e3e"
-                                onValueChange={() => setIsVisible(previousState => !previousState)}
+                                onValueChange={() => setIsVisible((prev) => !prev)}
                                 value={isVisible}
                                 style={styles.toggleButton}
                             />
@@ -134,7 +117,7 @@ export default function SalonShop({ route }) {
                                 trackColor={{ false: '#D3D3D3', true: '#FF0000' }}
                                 thumbColor={isVisible1 ? '#FF0000' : '#f4f3f4'}
                                 ios_backgroundColor="#3e3e3e"
-                                onValueChange={() => setIsVisible1(previousState => !previousState)}
+                                onValueChange={() => setIsVisible1((prev) => !prev)}
                                 value={isVisible1}
                                 style={styles.toggleButton}
                             />
@@ -147,7 +130,7 @@ export default function SalonShop({ route }) {
 
                     <FlatList
                         data={buttonsData}
-                        keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+                        keyExtractor={(item, index) => item.id.toString()}
                         renderItem={({ item }) => (
                             <TouchableOpacity style={styles.button} onPress={() => handleButtonPress(item.screen)}>
                                 <Text style={styles.buttonText}>{item.title}</Text>
@@ -159,7 +142,6 @@ export default function SalonShop({ route }) {
         />
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,

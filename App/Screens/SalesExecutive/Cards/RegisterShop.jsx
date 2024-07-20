@@ -22,23 +22,33 @@ export default function RegisterShop({ route }) {
     const [selectedCategoryId, setSelectedCategoryId] = useState('');
     const [selectedSubCategoryId, setSelectedSubCategoryId] = useState('');
 	const [phoneNumber, setPhoneNumber] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+       const [selectedCategoryType, setSelectedCategoryType] = useState('');
+  
+
 	
 	const { mobileNumber } = route.params;
 
     
-
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await fetch('http://192.168.29.67:3000/categories'); // Change to your server's endpoint
+                const response = await fetch('http://192.168.29.67:3000/api/v1/category/categories');
                 if (response.ok) {
-                    const data = await response.json();
-                    setCategories(data);
+                    const responseData = await response.json();
+                    console.log('Fetched categories:', responseData);
+                    if (responseData.success) {
+                        setCategories(responseData.data); // Ensure data has `type` field
+                    } else {
+                        console.error('Failed to fetch categories:', responseData.message);
+                    }
                 } else {
-                    console.error('Failed to fetch categories');
+                    console.error('Failed to fetch categories:', response.statusText);
                 }
             } catch (error) {
                 console.error('Error fetching categories:', error);
+            } finally {
+                setIsLoading(false); // Set loading to false after fetching
             }
         };
         fetchCategories();
@@ -48,16 +58,21 @@ export default function RegisterShop({ route }) {
         const fetchSubCategories = async () => {
             try {
                 if (selectedCategoryId) {
-                    const response = await fetch(`http://192.168.29.67:3000/subcategories/${selectedCategoryId}`);
+                    const response = await fetch(`http://192.168.29.67:3000/api/v1/category/subcategories/${selectedCategoryId}`);
                     if (response.ok) {
-                        const data = await response.json();
-                        setSubCategories(data);
+                        const responseData = await response.json();
+                        console.log('Fetched subcategories:', responseData);
+                        if (responseData.success) {
+                            setSubCategories(responseData.data);
+                        } else {
+                            console.error('Failed to fetch sub-categories:', responseData.message);
+                        }
                     } else {
-                        console.error('Failed to fetch sub-categories');
+                        console.error('Failed to fetch sub-categories:', response.statusText);
                     }
                 }
             } catch (error) {
-                console.error('Error fetching sub-categories: ', error);
+                console.error('Error fetching sub-categories:', error);
             }
         };
 
@@ -108,6 +123,18 @@ export default function RegisterShop({ route }) {
             Alert.alert('Error', 'Failed to register shopkeeper. Please try again later.');
         }
     };
+    
+    const handleCategoryChange = (itemValue) => {
+        setSelectedCategory(itemValue);
+        const category = categories.find(cat => cat.name === itemValue);
+        if (category) {
+            setSelectedCategoryId(category.id);
+            setSelectedCategoryType(category.type); // Set the type of the category
+        } else {
+            setSelectedCategoryId('');
+            setSelectedCategoryType(''); // Clear the type if category not found
+        }
+    };
 
     return (
         <ScrollView contentContainerStyle={styles.scrollViewContent} keyboardShouldPersistTaps="handled">
@@ -150,7 +177,7 @@ export default function RegisterShop({ route }) {
                     editable={false} // Make it read-only
                     keyboardType="numeric"
                 />
-</View>
+                </View>
                 <View style={styles.inputContainer}>
                     <Text style={styles.label}>Your Pincode*</Text>
                     <TextInput
@@ -190,47 +217,40 @@ export default function RegisterShop({ route }) {
                     />
                 </View>
                 <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Your Shop Category*</Text>
+                <Text style={styles.label}>Your Shop Category*</Text>
+                <Picker
+                    selectedValue={selectedCategory}
+                    onValueChange={handleCategoryChange}
+                    style={styles.picker}
+                >
+                    <Picker.Item label="Select a category" value="" />
+                    {categories.map((category) => (
+                        <Picker.Item key={category.id} label={category.name} value={category.name} />
+                    ))}
+                </Picker>
+            </View>
+
+                
+            {selectedCategoryId == '5' && (
+                <View style={styles.inputContainer}>
+                    <Text style={styles.label}>Type of shop</Text>
                     <Picker
-                        selectedValue={selectedCategory}
-                        onValueChange={(itemValue, itemIndex) => {
-                            setSelectedCategory(itemValue);
-                            // Find the ID of the selected category
-                            const category = categories.find(cat => cat.name === itemValue);
-                            setSelectedCategoryId(category ? category.id : ''); // Update the selected category ID state
+                        selectedValue={selectedSubCategory}
+                        onValueChange={(itemValue) => {
+                            setSelectedSubCategory(itemValue);
+                            const subCategory = subCategories.find(sub => sub.name === itemValue);
+                            setSelectedSubCategoryId(subCategory ? subCategory.id : '');
                         }}
                         style={styles.picker}
+                        enabled={!!subCategories.length}
                     >
-                        {categories.map((category, index) => (
-                            <Picker.Item key={index} label={category.name} value={category.name} />
+                        <Picker.Item label="Select a subcategory" value="" />
+                        {subCategories.map((subCategory) => (
+                            <Picker.Item key={subCategory.id} label={subCategory.name} value={subCategory.name} />
                         ))}
                     </Picker>
                 </View>
-
-                {selectedCategory === 'Salon Shop' && (
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Type of shop</Text>
-                        <Picker
-                            selectedValue={selectedSubCategory}
-                            onValueChange={(itemValue) => {
-                                // Update the selected subcategory
-                                setSelectedSubCategory(itemValue);
-
-                                // Find the subcategory object that matches the selected subcategory name
-                                const subCategory = subCategories.find(sub => sub.sub_category === itemValue);
-
-                                // Update the selected subcategory ID
-                                setSelectedSubCategoryId(subCategory ? subCategory.id : '');
-                            }}
-                            style={styles.picker}
-                            enabled={!!subCategories.length} // Enable or disable the picker based on the availability of subcategories
-                        >
-                            {subCategories.map((subCategory, index) => (
-                                <Picker.Item key={index} label={subCategory.sub_category} value={subCategory.sub_category} />
-                            ))}
-                        </Picker>
-                    </View>
-                )}
+            )}
 
                 <Button
                     title="Submit"

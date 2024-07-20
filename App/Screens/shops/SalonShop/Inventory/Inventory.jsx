@@ -13,7 +13,7 @@ const Inventory = ({ route }) => {
     useEffect(() => {
         const fetchMainServices = async () => {
             try {
-                const response = await fetch(`http://192.168.29.67:3000/mainServices/${selectedSubCategory}`);
+                const response = await fetch(`http://192.168.29.67:3000/api/v1/services/mainServices/${selectedSubCategory}`);
                 if (response.ok) {
                     const data = await response.json();
                     setServices(data);
