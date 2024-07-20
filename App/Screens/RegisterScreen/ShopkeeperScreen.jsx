@@ -348,16 +348,11 @@ export default function ShopkeeperScreen({ route }) {
                                 </Picker>
                          </View>
 
-                
                          <View style={styles.inputContainer}>
     <Text style={styles.label}>Your Shop Category*</Text>
     <Picker
         selectedValue={selectedCategory}
-        onValueChange={(itemValue) => {
-            const selectedCat = categories.find(cat => cat.name === itemValue);
-            setSelectedCategory(itemValue);
-            setSelectedCategoryId(selectedCat ? selectedCat.id : ''); // Update selectedCategoryId based on selected category
-        }}
+        onValueChange={(itemValue) => handleCategoryChange(itemValue)}
         style={styles.picker}
     >
         <Picker.Item label="Select a category" value="" />

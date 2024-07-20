@@ -14,25 +14,21 @@ const Inventory = ({ route }) => {
         const fetchMainServices = async () => {
             try {
                 const response = await fetch(`http://192.168.29.67:3000/api/v1/services/mainServices/${selectedSubCategory}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setServices(data);
+                const data = await response.json();
+                if (response.ok && data.success) {
+                    setServices(data.data);
                 } else {
-                    console.error('Failed to fetch main services:', response.statusText);
+                    console.error('Failed to fetch main services:', data.message);
+                    Alert.alert('Error', 'Failed to fetch main services. Please try again later.');
                 }
             } catch (error) {
                 console.error('Error fetching main services:', error);
+                Alert.alert('Error', 'Failed to fetch main services. Please try again later.');
             } finally {
-                setLoading(false); 
+                setLoading(false);
             }
         };
-
-        fetchMainServices();
-
-        // Clean up function (optional) for async operations
-        return () => {
-            // Clean-up logic if needed
-        };
+        fetchMainServices()
     }, [selectedSubCategory]);
 
     const renderService = ({ item }) => (
