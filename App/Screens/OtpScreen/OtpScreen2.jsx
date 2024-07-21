@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Button, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Button, TouchableOpacity, Dimensions, Image,Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const windowWidth = Dimensions.get('window').width;
@@ -19,102 +19,38 @@ export default function OtpScreen2({ route }) {
         setIsCorrectOtp(true);
     };
 
-    //const handleSubmit = async () => {
-    //    const correctOtp = '1234'; // Example correct OTP
+     
     
-    //    // Perform OTP verification
-    //    if (otp === correctOtp) {
-    //        setIsCorrectOtp(true);
-    
-    //        try {
-    //            const response = await fetch('http://192.168.29.67:3000/api/v1/auth/login', {
-    //                method: 'POST',
-    //                headers: {
-    //                    'Content-Type': 'application/json',
-    //                },
-    //                body: JSON.stringify({ phoneNumber, userType }),
-    //            });
-    
-    //            const data = await response.json();
-    
-    //            if (response.ok) {
-    //                if (userType === 'shopkeeper') {
-    //                    // Fetch shopkeeper details
-    //                    const shopkeeperResponse = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeper?phoneNumber=${phoneNumber}`);
-    //                    const shopkeeperData = await shopkeeperResponse.json();
-    //                    const selectedCategory = shopkeeperData.selectedCategory;
-    
-    //                    // Fetch category details
-    //                    const categoryResponse = await fetch(`http://192.168.29.67:3000/api/v1/category?name=${selectedCategory}`);
-    //                    const categoryData = await categoryResponse.json();
-    
-    //                    if (categoryData && categoryData.type) {
-    //                        const shopkeeperType = categoryData.type;
-    
-    //                        if (shopkeeperType === 'service') {
-    //                            navigation.navigate('ShopkeeperHome', { phoneNumber, userType: 'shopkeeper', shopkeeperType, selectedCategory });
-    //                        } else if (shopkeeperType === 'product') {
-    //                            navigation.navigate('ShopkeeperProductHome', { phoneNumber, userType: 'shopkeeper', shopkeeperType, selectedCategory });
-    //                        }
-    //                    } else {
-    //                        console.error('Category type not found');
-    //                    }
-    //                } else if (userType === 'customer') {
-    //                    navigation.navigate('CustomerHomePage', { phoneNumber, userType });
-    //                } else if (userType === 'unregistered') {
-    //                    navigation.navigate('Register', { phoneNumber, userType });
-    //                }
-    //            } else {
-    //                console.error('Error:', data.message); // Ensure to log `data.message` for correct error message
-    //            }
-    //        } catch (error) {
-    //            console.error('Error:', error);
-    //        }
-    //    } else {
-    //        setIsCorrectOtp(false);
-    //    }
-    //};
-    
-    
-    const handleSubmit = async () => {
-        const correctOtp = '1234'; // Example correct OTP
-    
-        // Perform OTP verification
-        if (otp === correctOtp) {
-            setIsCorrectOtp(true);
-    
-            if (userType === 'shopkeeper') {
-                try {
-                    // Fetch shopkeeper details
-                    const shopkeeperResponse = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeper?phoneNumber=${phoneNumber}`);
-                    const shopkeeperData = await shopkeeperResponse.json();
-                    const selectedCategory = shopkeeperData.selectedCategory;
+    const handleSubmit = async (phoneNumber, otp) => {
+        // Log phoneNumber and otp to the console
+        console.log('Phone Number:', phoneNumber);
+        console.log('OTP:', otp);
 
-                    // Fetch category details
-                    const categoryResponse = await fetch(`http://192.168.29.67:3000/api/v1/category?name=${selectedCategory}`);
-                    const categoryData = await categoryResponse.json();
+        // Perform OTP validation
+        try {
+            const response = await fetch('https://c2bc-49-43-101-175.ngrok-free.app/api/v1/otp/validate-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ phoneNumber, otp }),
+            });
 
-                    if (categoryData && categoryData.type) {
-                        const shopkeeperType = categoryData.type;
+            const data = await response.json();
 
-                        if (shopkeeperType === 'service') {
-                            navigation.navigate('ShopkeeperHome', { phoneNumber, userType: 'shopkeeper', shopkeeperType, selectedCategory });
-                        } else if (shopkeeperType === 'product') {
-                            navigation.navigate('ShopkeeperProductHome', { phoneNumber, userType: 'shopkeeper', shopkeeperType, selectedCategory });
-                        }
-                    } else {
-                        console.error('Category type not found');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                }
-            } else if (userType === 'customer') {
-                navigation.navigate('CustomerHomePage', { phoneNumber, userType });
-            } else if (userType === 'unregistered') {
-                navigation.navigate('Register', { phoneNumber, userType });
+            if (response.ok) {
+                // OTP validation successful
+                Alert.alert('Success', data.message);
+                // Navigate to a different screen or handle success accordingly
+                navigation.navigate('Pay'); // Update this with the appropriate screen name
+            } else {
+                // OTP validation failed
+                Alert.alert('Error', data.message || 'Invalid OTP. Please try again.');
+                setIsCorrectOtp(false);
             }
-        } else {
-            setIsCorrectOtp(false);
+        } catch (error) {
+            console.error('An error occurred while validating the OTP:', error);
+            Alert.alert('Error', 'An error occurred while validating the OTP.');
         }
     };
 
@@ -148,7 +84,7 @@ export default function OtpScreen2({ route }) {
                 <Text style={[styles.subheading, { textAlign: 'left' }]}>Enter the OTP below *</Text>
                 <View style={styles.otpMainContainer}>
                     <View style={styles.otpContainer}>
-                        {[0, 1, 2, 3].map((index) => (
+                        {[0, 1, 2, 3 ,4, 5].map((index) => (
                             <TextInput
                                 key={index}
                                 style={styles.otpInput}
@@ -168,7 +104,7 @@ export default function OtpScreen2({ route }) {
             <View style={styles.buttonContainer}>
                 <Button
                     title="Submit"
-                    onPress={handleSubmit}
+                    onPress={() => handleSubmit(phoneNumber, otp)}
                 />
             </View>
             <View style={styles.sentTextContainer}>

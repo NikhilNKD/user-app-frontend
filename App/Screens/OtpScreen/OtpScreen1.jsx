@@ -10,12 +10,13 @@ export default function OtpScreen1() {
     const { setCustPhoneNumber } = useCustomer();
     const [phoneNumber, setPhoneNumber] = useState('');
     const navigation = useNavigation();
-    
+
     useEffect(() => {
         // Set custPhoneNumber when the component mounts
         setCustPhoneNumber(phoneNumber);
-    }, []);
-
+    }, [phoneNumber]);
+    
+    
     const handleSubmitPhoneNumber = () => {
         // Validate phone number
         const phoneRegex = /^[0-9]{10}$/;
@@ -23,39 +24,35 @@ export default function OtpScreen1() {
             alert('Please enter a valid 10-digit phone number');
             return;
         }
-    
-        // Send a request to check if any user exists with the provided phone number
-        fetch('http://192.168.29.67:3000/api/v1/auth/check-phone-number', {
+
+        // Generate OTP
+        console.log('Sending phone number to OTP API:', phoneNumber);
+        fetch('https://c2bc-49-43-101-175.ngrok-free.app/api/v1/otp/generate-otp', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ phoneNumber }),
+            body: JSON.stringify({phoneNumber}), // Ensuring the body is JSON string
         })
-        .then(async response => {
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to check phone number');
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Assuming 'data' contains information to determine userType
-            if (data.exists) {
-                // Phone number already exists, navigate to Otp2 with the correct userType
-                const userType = data.message.includes('shopkeepers') ? 'shopkeeper' : 'customer';
-                navigation.navigate('Otp2', { phoneNumber, userType });
-            } else {
+        .then(response => {
+            if (response.ok) {
                 // Phone number is available, navigate to Otp2 with userType 'unregistered'
                 navigation.navigate('Otp2', { phoneNumber, userType: 'unregistered' });
+            } else {
+                return response.json();
+            }
+        })
+        .then(data => {
+            if (data) {
+                // Phone number already exists, navigate to Otp2 with the correct userType
+                navigation.navigate('Otp2', { phoneNumber, userType: data.message.includes('shopkeepers') ? 'shopkeeper' : 'customer' });
             }
         })
         .catch(error => {
-            console.error('An error occurred while checking the phone number:', error);
-            alert('An error occurred while checking the phone number.');
+            console.error('An error occurred while generating the OTP:', error);
+            alert('An error occurred while generating the OTP.');
         });
     };
-    
     
 
     return (
