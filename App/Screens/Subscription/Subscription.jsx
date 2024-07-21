@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, Button, Image, ActivityIndicator, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import PhonePePaymentSDK from 'react-native-phonepe-pg' 
-import Base64 from 'base-64';
-import sha256 from 'crypto-js/sha256';
+import PhonePePaymentSDK from 'react-native-phonepe-pg';
+import Base64 from 'react-native-base64';
+import sha256 from 'crypto-js/sha256'; // Use crypto-js for sha256
 
 export default function Subscription({ route }) {
     const { selectedSubCategory, selectedSubCategoryId, userType, selectedCategoryType, selectedCategory } = route.params;
 
     const [environment, setEnvironment] = useState("SANDBOX");
-    const [merchantId, setMerchantID] = useState("PGTESTPAYUAT");
+    const [merchantId, setMerchantID] = useState("PGTESTPAYUAT86");
     const [appId, setAppID] = useState(null);
     const [enableLogging, setEnableLogging] = useState(true);
     const [data, setData] = useState({
@@ -39,18 +39,20 @@ export default function Subscription({ route }) {
                     merchantId: merchantId,
                     merchantTransactionId: generateTransactionId(),
                     merchantUserId: "",
-                    callbackUrl: "",
-                    amount: data.amount,
+                    amount: (data.amount * 100), // amount should be in paisa
                     mobileNumber: data.mobile,
+                    callbackUrl: "",
                     paymentInstrument: {
-                        type: "PAY_PAGE"
-                    }
+                        type: "PAY_PAGE",
+                        //targetApp: "com.phonepe.app"
+                    },
+                    deviceContext: { deviceOS: "ANDROID" }
                 };
 
                 console.log('Request body:', requestBody);
 
-                const salt_key = "099eb0cd-02cf-4e2a-8aca-3e6c6aff0399";
-                const salt_Index = "1";
+                const salt_key = "96434309-7796-489d-8924-ab56988a6076";
+                const salt_Index = 1;
                 const payload = JSON.stringify(requestBody);
                 const payload_main = Base64.encode(payload);
                 const string = payload_main + "/pg/v1/pay" + salt_key;
@@ -59,13 +61,16 @@ export default function Subscription({ route }) {
                 console.log('Payload main:', payload_main);
                 console.log('Checksum:', checksum);
 
-                return PhonePePaymentSDK.startTransaction(payload_main, checksum, null, null);
-            })
-            .then(response => {
-                console.log('Transaction started successfully:', response);
+                PhonePePaymentSDK.startTransaction(payload_main, checksum, null, null)
+                    .then((resp) => {
+                        console.log('Transaction started successfully:', resp);
+                    })
+                    .catch((err) => {
+                        console.error('Error in transaction:', err.message || err);
+                    });
             })
             .catch(err => {
-                console.error('Error:', err.message || err);
+                console.error('Error initializing SDK:', err.message || err);
             })
             .finally(() => {
                 setLoading(false); // Re-enable the button
@@ -98,7 +103,7 @@ export default function Subscription({ route }) {
             />
             {loading && <ActivityIndicator size="large" color="#0000ff" />}
         </View>
-    );
+    );
 }
 
 const styles = StyleSheet.create({
@@ -115,7 +120,7 @@ const styles = StyleSheet.create({
     heading: {
         fontSize: 26,
         fontWeight: 'bold',
-        marginBottom: 10, // Adjust the margin to match the bullet points
+        marginBottom: 10,
     },
     price: {
         fontSize: 26,
@@ -126,18 +131,17 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         fontSize: 16,
         fontWeight: 'bold',
-        marginLeft: 20, // Align with the bullet points
+        marginLeft: 20,
     },
     bulletPoints: {
         width: '80%',
         marginLeft: 'auto',
         marginRight: 'auto',
-        textAlign: 'left',
     },
     bullet: {
         fontSize: 15,
         marginLeft: 20,
         marginBottom: 5,
         fontWeight: '500',
-    },
+    },
 });
