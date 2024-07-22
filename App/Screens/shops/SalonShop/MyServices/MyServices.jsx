@@ -4,7 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useCart } from '../../../../Context/ContextApi';
 
 const MyServices = ({ route, navigation }) => {
-    const { phoneNumber, userType, shopID, firstcustomerName, custPhoneNumber,shopkeeperName } = route.params;
+    const { phoneNumber, userType, shopID, firstcustomerName, custPhoneNumber, shopkeeperName } = route.params;
     const [mainServices, setMainServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const { setGlobalPhoneNumber } = useCart();
@@ -12,9 +12,18 @@ const MyServices = ({ route, navigation }) => {
     useEffect(() => {
         const fetchMainServices = async () => {
             try {
-                const response = await fetch(`http://192.168.29.67:3000/shopkeeper/selectedMainServices/${phoneNumber}`);
-                const data = await response.json();
-                setMainServices(data);
+                const response = await fetch(`http://192.168.29.67:3000/api/v1/services/selectedMainServices/${phoneNumber}`);
+                
+                const contentType = response.headers.get('Content-Type');
+                if (contentType && contentType.includes('application/json')) {
+                    const data = await response.json();
+                    console.log('Fetched data:', data);
+                    setMainServices(data.data || []); // Ensure 'data.data' is correctly set
+                } else {
+                    const text = await response.text();
+                    console.error('Unexpected response format:', text);
+                    throw new Error('Unexpected response format');
+                }
             } catch (error) {
                 console.error('Error fetching selected main services:', error);
             } finally {
@@ -22,12 +31,12 @@ const MyServices = ({ route, navigation }) => {
             }
         };
         setGlobalPhoneNumber(phoneNumber);
-
+    
         fetchMainServices();
     }, [phoneNumber, setGlobalPhoneNumber]);
-
-    const handleMainServiceClick = (mainServiceId) => {
-        navigation.navigate('SelectedServices', { shopPhoneNumber: phoneNumber, mainServiceId, userType, shopID, firstcustomerName, custPhoneNumber });
+    
+    const handleMainServiceClick = (id) => {
+        navigation.navigate('SelectedServices', { shopPhoneNumber: phoneNumber, mainServiceId: id, userType, shopID, firstcustomerName, custPhoneNumber });
     };
 
     return (
@@ -50,16 +59,19 @@ const MyServices = ({ route, navigation }) => {
             ) : (
                 <FlatList
                     data={mainServices}
-                    keyExtractor={(item) => item.mainServiceId.toString()}
-                    renderItem={({ item }) => (
-                        <TouchableOpacity
-                            onPress={() => handleMainServiceClick(item.mainServiceId)}
-                            style={styles.item}
-                        >
-                            <MaterialIcons name="people-alt" size={24} color="black" style={styles.icon} />
-                            <Text style={styles.itemText}>{item.mainServiceName}</Text>
-                        </TouchableOpacity>
-                    )}
+                    keyExtractor={(item) => item.id ? item.id.toString() : 'unknown'} // Default key if undefined
+                    renderItem={({ item }) => {
+                        console.log('Rendering item:', item);
+                        return (
+                            <TouchableOpacity
+                                onPress={() => handleMainServiceClick(item.id)}
+                                style={styles.item}
+                            >
+                                <MaterialIcons name="people-alt" size={24} color="black" style={styles.icon} />
+                                <Text style={styles.itemText}>{item.name || 'Unnamed Service'}</Text>
+                            </TouchableOpacity>
+                        );
+                    }}
                     numColumns={2}
                 />
             )}

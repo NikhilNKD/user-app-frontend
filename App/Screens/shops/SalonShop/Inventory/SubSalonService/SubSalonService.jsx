@@ -64,7 +64,7 @@ export default function SubSalonService({ route, navigation }) {
 
     const goToMyServices = async () => {
         try {
-            await fetch('http://192.168.29.67:3000/saveSelectedServices', {
+            await fetch('http://192.168.29.67:3000/api/v1//services/saveSelectedServices', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -277,7 +277,7 @@ const styles = StyleSheet.create({
         width: 200,
         backgroundColor: '#fff',
     },
-    navigateButton: {
+     navigateButton: {
         backgroundColor: '#007BFF', // Blue background color
         paddingVertical: 10, // Vertical padding
         paddingHorizontal: 20, // Horizontal padding

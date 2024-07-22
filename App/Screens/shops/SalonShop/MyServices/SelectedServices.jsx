@@ -17,10 +17,21 @@ const SubServices = ({ route }) => {
 
   const fetchSubServices = async () => {
     try {
-      const response = await fetch(`http://192.168.29.67:3000/shopkeeper/selectedSubServices/${shopPhoneNumber}/${mainServiceId}`);
+      const response = await fetch(`http://192.168.29.67:3000/api/v1/services/selectedSubServices/${shopPhoneNumber}/${mainServiceId}`);
       if (response.ok) {
         const data = await response.json();
-        setSubServices(data);
+        if (data && Array.isArray(data.data)) {
+          const formattedData = data.data.map(subService => ({
+            id: subService.id ? subService.id.toString() : 'no-id',
+            subServiceName: subService.name || 'N/A',
+            subServicePrice: '200.00', // Replace with actual price if available
+          }));
+          console.log('Formatted Data:', formattedData); // Add this line
+          setSubServices(formattedData);
+        } else {
+          console.error('Expected data.data to be an array, but got:', data);
+          setSubServices([]);
+        }
       } else {
         console.error('Failed to fetch selected sub services:', response.statusText);
       }
@@ -33,7 +44,7 @@ const SubServices = ({ route }) => {
 
   const fetchShopDetails = async () => {
     try {
-      const response = await fetch(`http://192.168.29.67:3000/shopkeeperServiceDetails/${shopPhoneNumber}`);
+      const response = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeperDetails/service/${shopPhoneNumber}`);
       if (response.ok) {
         const data = await response.json();
         setShopID(data.shopID);
@@ -48,8 +59,8 @@ const SubServices = ({ route }) => {
   const renderSubService = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.detailsContainer}>
-        <Text style={styles.subServiceName}>{item.subServiceName || 'N/A'}</Text>
-        <Text style={styles.subServicePrice}>Price: ₹{item.subServicePrice || 'N/A'}</Text>
+        <Text style={styles.subServiceName}>{item.subServiceName || 'No name'}</Text>
+        <Text style={styles.subServicePrice}>Price: ₹{item.subServicePrice}</Text>
 
         {userType === 'customer' && (
           <TouchableOpacity onPress={() => addToCart(custPhoneNumber, item, shopPhoneNumber, shopID, 'service')} style={styles.addToCartButton}>
@@ -61,6 +72,11 @@ const SubServices = ({ route }) => {
   );
 
   const formatData = (data, numColumns) => {
+    if (!Array.isArray(data)) {
+      console.error('Expected data to be an array, but got:', data);
+      return [];
+    }
+
     const numberOfFullRows = Math.floor(data.length / numColumns);
     let numberOfElementsLastRow = data.length - (numberOfFullRows * numColumns);
 
@@ -86,13 +102,8 @@ const SubServices = ({ route }) => {
       ) : (
         <FlatList
           data={formatData(subServices, numColumns)}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => {
-            if (item.empty) {
-              return <View style={[styles.card, styles.invisibleCard]} />;
-            }
-            return renderSubService({ item });
-          }}
+          keyExtractor={(item) => item.id || 'no-id'}
+          renderItem={renderSubService}
           numColumns={numColumns}
         />
       )}
@@ -131,14 +142,12 @@ const styles = StyleSheet.create({
   subServiceName: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#fff',
+    color: '#000',
     marginBottom: 5,
-    textAlign: 'center',
   },
   subServicePrice: {
     fontSize: 14,
-    color: '#fff',
-    textAlign: 'center',
+    color: '#666',
   },
   addToCartButton: {
     backgroundColor: '#45CE30',

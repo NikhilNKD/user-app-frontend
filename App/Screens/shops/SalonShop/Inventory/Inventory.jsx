@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity, Image, useWindowDimensions,Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const Inventory = ({ route }) => {
