@@ -2,10 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity, Button, Image, Modal } from 'react-native';
 
 export default function SubSalonService({ route, navigation }) {
-    const { mainServiceId } = route.params;
-    const { phoneNumber, shopkeeperName } = route.params;
+    const { mainServiceId, phoneNumber, shopkeeperName } = route.params;
 
-    // State to store the fetched sub-services, selected services, entered prices, and search query
     const [subServices, setSubServices] = useState([]);
     const [selectedServices, setSelectedServices] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
@@ -14,18 +12,15 @@ export default function SubSalonService({ route, navigation }) {
     const [currentServiceId, setCurrentServiceId] = useState(null);
     const [enteredPrices, setEnteredPrices] = useState({});
 
-    // Fetch sub-services based on the main service ID
     useEffect(() => {
         const fetchSubServices = async () => {
             try {
-                const response = await fetch(`http://192.168.29.67:3000/services/subServices/${mainServiceId}`);
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    const data = await response.json();
-                    setSubServices(data);
+                const response = await fetch(`http://192.168.29.67:3000/api/v1/services/subServices/${mainServiceId}`);
+                const data = await response.json();
+                if (Array.isArray(data.data)) {
+                    setSubServices(data.data);
                 } else {
-                    const text = await response.text();
-                    console.error('Unexpected response format:', text);
+                    console.error('Unexpected data format:', data);
                 }
             } catch (error) {
                 console.error('Error fetching sub-services:', error);
@@ -37,13 +32,11 @@ export default function SubSalonService({ route, navigation }) {
         fetchSubServices();
     }, [mainServiceId]);
 
-    // Function to handle button click for selecting services and entering price
     const handleServiceSelect = (serviceId, price) => {
         setCurrentServiceId(serviceId);
         setModalVisible(true);
     };
 
-    // Function to handle adding price and service to selected services
     const addServiceWithPrice = () => {
         const price = parseFloat(enteredPrices[currentServiceId]);
         if (!isNaN(price) && price >= 0) {
@@ -57,20 +50,18 @@ export default function SubSalonService({ route, navigation }) {
             }
             setModalVisible(false);
         } else {
-            alert('Please enter a valid price.');
+            Alert.alert('Invalid Price', 'Please enter a valid price.');
         }
     };
 
-    // Function to get the entered price for a service
     const getPriceForService = (serviceId) => {
         return enteredPrices[serviceId] || '';
     };
 
-    // Filter sub-services based on search query
     const filteredSubServices = subServices.filter((service) =>
         service.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-    
+
     const goToMyServices = async () => {
         try {
             await fetch('http://192.168.29.67:3000/saveSelectedServices', {
@@ -87,7 +78,7 @@ export default function SubSalonService({ route, navigation }) {
                     }))
                 }),
             });
-    
+
             setSelectedServices([]);
             navigation.navigate('MyServices', { phoneNumber: phoneNumber });
         } catch (error) {
@@ -106,7 +97,6 @@ export default function SubSalonService({ route, navigation }) {
                 </View>
             </View>
 
-            {/* Search bar */}
             <TextInput
                 style={styles.searchBar}
                 placeholder="Search sub-services..."
@@ -114,7 +104,6 @@ export default function SubSalonService({ route, navigation }) {
                 onChangeText={setSearchQuery}
             />
 
-            {/* Display loading indicator while fetching data */}
             {loading ? (
                 <ActivityIndicator size="large" color="#0000ff" />
             ) : (
@@ -125,15 +114,13 @@ export default function SubSalonService({ route, navigation }) {
                         <View style={styles.card}>
                             <Text style={styles.itemText}>{item.name}</Text>
                             <Text style={styles.description}>{item.description}</Text>
-                            {/* Display entered price for the service */}
                             <Text style={styles.itemText}>Price: ₹{getPriceForService(item.id)}</Text>
-                            {/* Button to select the service */}
                             <TouchableOpacity
                                 style={[
                                     styles.button,
                                     selectedServices.find(service => service.id === item.id) && styles.buttonSelected
                                 ]}
-                                onPress={() => handleServiceSelect(item.id, item.price)} // Pass price to handleServiceSelect
+                                onPress={() => handleServiceSelect(item.id, item.price)}
                             >
                                 <Text style={styles.buttonText}>
                                     {selectedServices.find(service => service.id === item.id) ? 'Selected' : 'Select'}
@@ -144,14 +131,11 @@ export default function SubSalonService({ route, navigation }) {
                 />
             )}
 
-            {/* Modal for entering price */}
             <Modal
                 animationType="slide"
                 transparent={true}
                 visible={modalVisible}
-                onRequestClose={() => {
-                    setModalVisible(false);
-                }}
+                onRequestClose={() => setModalVisible(false)}
             >
                 <View style={styles.centeredView}>
                     <View style={styles.modalView}>
@@ -160,16 +144,20 @@ export default function SubSalonService({ route, navigation }) {
                             style={styles.priceInput}
                             placeholder="Price"
                             keyboardType="numeric"
-                            value={getPriceForService(currentServiceId)} // Use enteredPrices to display the price
-                            onChangeText={price => setEnteredPrices(prevPrices => ({ ...prevPrices, [currentServiceId]: price }))}
+                            value={enteredPrices[currentServiceId] || ''}
+                            onChangeText={(text) => setEnteredPrices({ ...enteredPrices, [currentServiceId]: text })}
                         />
-                        <Button title="OK" onPress={addServiceWithPrice} />
+                        <Button title="Add Service" onPress={addServiceWithPrice} />
                     </View>
                 </View>
             </Modal>
 
-            {/* Button to navigate to MyServices screen */}
-            <Button title="Go to MyServices" onPress={goToMyServices} />
+            <TouchableOpacity
+                style={styles.navigateButton}
+                onPress={goToMyServices}
+            >
+                <Text style={styles.navigateButtonText}>Go to My Services</Text>
+            </TouchableOpacity>
         </View>
     );
 }
@@ -288,5 +276,18 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         width: 200,
         backgroundColor: '#fff',
+    },
+    navigateButton: {
+        backgroundColor: '#007BFF', // Blue background color
+        paddingVertical: 10, // Vertical padding
+        paddingHorizontal: 20, // Horizontal padding
+        borderRadius: 5, // Rounded corners
+        alignItems: 'center', // Center the text
+        marginVertical: 10, // Vertical margin
+    },
+    navigateButtonText: {
+        color: '#FFFFFF', // White text color
+        fontSize: 16, // Font size
+        fontWeight: 'bold', // Bold text
     },
 });
