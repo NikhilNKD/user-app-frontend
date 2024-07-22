@@ -6,7 +6,7 @@ import Base64 from 'react-native-base64';
 import sha256 from 'crypto-js/sha256'; // Use crypto-js for sha256
 
 export default function Subscription({ route }) {
-    const { selectedSubCategory, selectedSubCategoryId, userType, selectedCategoryType, selectedCategory } = route.params;
+     
 
     const [environment, setEnvironment] = useState("SANDBOX");
     const [merchantId, setMerchantID] = useState("PGTESTPAYUAT86");
@@ -46,7 +46,7 @@ export default function Subscription({ route }) {
                         type: "PAY_PAGE",
                         //targetApp: "com.phonepe.app"
                     },
-                    deviceContext: { deviceOS: "ANDROID" }
+                    //deviceContext: { deviceOS: "ANDROID" }
                 };
 
                 console.log('Request body:', requestBody);
@@ -85,7 +85,7 @@ export default function Subscription({ route }) {
             <Text style={styles.price}>₹3650</Text>
             <View style={styles.bulletPoints}>
                 <Text style={styles.details}>
-                    12 Months + 2 Months FREE {selectedCategoryType} {selectedCategory} {data.mobile}
+                    12 Months + 2 Months FREE   {data.mobile}
                 </Text>
                 <Text style={styles.bullet}>• Per Day Cost Less Than a Cup of Tea</Text>
                 <Text style={styles.bullet}>• Get your OWN Online Shop.</Text>

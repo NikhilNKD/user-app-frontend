@@ -27,7 +27,7 @@ export default function OtpScreen1() {
 
         // Generate OTP
         console.log('Sending phone number to OTP API:', phoneNumber);
-        fetch('https://c2bc-49-43-101-175.ngrok-free.app/api/v1/otp/generate-otp', {
+        fetch('https://9c33-49-43-101-167.ngrok-free.app/api/v1/otp/generate-otp', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

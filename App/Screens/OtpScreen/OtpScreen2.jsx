@@ -28,7 +28,7 @@ export default function OtpScreen2({ route }) {
 
         // Perform OTP validation
         try {
-            const response = await fetch('https://c2bc-49-43-101-175.ngrok-free.app/api/v1/otp/validate-otp', {
+            const response = await fetch('https://9c33-49-43-101-167.ngrok-free.app/api/v1/otp/validate-otp', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -42,7 +42,7 @@ export default function OtpScreen2({ route }) {
                 // OTP validation successful
                 Alert.alert('Success', data.message);
                 // Navigate to a different screen or handle success accordingly
-                navigation.navigate('Pay'); // Update this with the appropriate screen name
+                navigation.navigate('Subscription'); // Update this with the appropriate screen name
             } else {
                 // OTP validation failed
                 Alert.alert('Error', data.message || 'Invalid OTP. Please try again.');
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     otpContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        width: '70%',
+        width: '40%',
     },
     otpInput: {
         width: '22%',
