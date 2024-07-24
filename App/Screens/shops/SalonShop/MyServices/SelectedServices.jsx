@@ -17,30 +17,32 @@ const SubServices = ({ route }) => {
 
   const fetchSubServices = async () => {
     try {
-      const response = await fetch(`http://192.168.29.67:3000/api/v1/services/selectedSubServices/${shopPhoneNumber}/${mainServiceId}`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data && Array.isArray(data.data)) {
-          const formattedData = data.data.map(subService => ({
-            id: subService.id ? subService.id.toString() : 'no-id',
-            subServiceName: subService.name || 'N/A',
-            subServicePrice: '200.00', // Replace with actual price if available
-          }));
-          console.log('Formatted Data:', formattedData); // Add this line
-          setSubServices(formattedData);
+        const response = await fetch(`http://192.168.29.67:3000/api/v1/services/selectedSubServices/${shopPhoneNumber}/${mainServiceId}`);
+        if (response.ok) {
+            const data = await response.json();
+            if (data && Array.isArray(data.data)) {
+                const filteredData = data.data.filter(subService => 
+                    subService.subService?.id && subService.subService?.name && subService.price
+                ).map(subService => ({
+                    id: subService.subService.id.toString(),
+                    subServiceName: subService.subService.name,
+                    subServicePrice: subService.price.toString(),
+                }));
+                setSubServices(filteredData);
+            } else {
+                console.error('Expected data.data to be an array, but got:', data);
+                setSubServices([]);
+            }
         } else {
-          console.error('Expected data.data to be an array, but got:', data);
-          setSubServices([]);
+            console.error('Failed to fetch selected sub services:', response.statusText);
         }
-      } else {
-        console.error('Failed to fetch selected sub services:', response.statusText);
-      }
     } catch (error) {
-      console.error('Error fetching selected sub services:', error);
+        console.error('Error fetching selected sub services:', error);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
+
 
   const fetchShopDetails = async () => {
     try {
@@ -58,18 +60,17 @@ const SubServices = ({ route }) => {
 
   const renderSubService = ({ item }) => (
     <View style={styles.card}>
-      <View style={styles.detailsContainer}>
-        <Text style={styles.subServiceName}>{item.subServiceName || 'No name'}</Text>
-        <Text style={styles.subServicePrice}>Price: ₹{item.subServicePrice}</Text>
-
-        {userType === 'customer' && (
-          <TouchableOpacity onPress={() => addToCart(custPhoneNumber, item, shopPhoneNumber, shopID, 'service')} style={styles.addToCartButton}>
-            <Text style={styles.addToCartButtonText}>Add to Cart</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+        <View style={styles.detailsContainer}>
+            <Text style={styles.subServiceName}>{item.subServiceName}</Text>
+            <Text style={styles.subServicePrice}>Price: ₹{item.subServicePrice}</Text>
+            {userType === 'customer' && (
+                <TouchableOpacity onPress={() => addToCart(custPhoneNumber, item, shopPhoneNumber, shopID, 'service')} style={styles.addToCartButton}>
+                    <Text style={styles.addToCartButtonText}>Add to Cart</Text>
+                </TouchableOpacity>
+            )}
+        </View>
     </View>
-  );
+);
 
   const formatData = (data, numColumns) => {
     if (!Array.isArray(data)) {
@@ -93,20 +94,32 @@ const SubServices = ({ route }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.welcomeText}>Welcome: {firstcustomerName}</Text>
-      <Text style={styles.welcomeText}>Shop Phone number: {shopID}</Text>
+      <Text style={styles.welcomeText}>Shop Phone number: {shopPhoneNumber}</Text>
 
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
-      ) : subServices.length === 0 ? (
-        <Text>No sub services found for this main service</Text>
-      ) : (
-        <FlatList
-          data={formatData(subServices, numColumns)}
-          keyExtractor={(item) => item.id || 'no-id'}
-          renderItem={renderSubService}
-          numColumns={numColumns}
-        />
-      )}
+    <ActivityIndicator size="large" color="#0000ff" />
+) : subServices.length === 0 ? (
+    <Text>No sub services found for this main service</Text>
+) : (
+    <FlatList
+        data={subServices}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => item.id && item.subServiceName && item.subServicePrice ? (
+            <View style={styles.card}>
+                <View style={styles.detailsContainer}>
+                    <Text style={styles.subServiceName}>{item.subServiceName}</Text>
+                    <Text style={styles.subServicePrice}>Price: ₹{item.subServicePrice}</Text>
+                    {userType === 'customer' && (
+                        <TouchableOpacity onPress={() => addToCart(custPhoneNumber, item, shopPhoneNumber, shopID, 'service')} style={styles.addToCartButton}>
+                            <Text style={styles.addToCartButtonText}>Add to Cart</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
+            </View>
+        ) : null}
+        numColumns={2}
+    />
+)}
     </View>
   );
 };
