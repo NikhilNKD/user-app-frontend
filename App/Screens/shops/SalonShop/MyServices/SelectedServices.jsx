@@ -3,8 +3,8 @@ import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity }
 import { useCart } from '../../../../Context/ContextApi';
 
 const SubServices = ({ route }) => {
-  const { shopPhoneNumber, mainServiceId, userType, firstcustomerName, custPhoneNumber } = route.params;
-  const { addToCart, setCustPhoneNumber } = useCart();
+  const { shopPhoneNumber, mainServiceId, userType, firstCustomerName, custPhoneNumber } = route.params;
+  const { addToCart, setCustPhoneNumber } = useCart(); // Destructure useCart hook
   const [subServices, setSubServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [shopID, setShopID] = useState('');
@@ -17,32 +17,35 @@ const SubServices = ({ route }) => {
 
   const fetchSubServices = async () => {
     try {
-        const response = await fetch(`http://192.168.29.67:3000/api/v1/services/selectedSubServices/${shopPhoneNumber}/${mainServiceId}`);
-        if (response.ok) {
-            const data = await response.json();
-            if (data && Array.isArray(data.data)) {
-                const filteredData = data.data.filter(subService => 
-                    subService.subService?.id && subService.subService?.name && subService.price
-                ).map(subService => ({
-                    id: subService.subService.id.toString(),
-                    subServiceName: subService.subService.name,
-                    subServicePrice: subService.price.toString(),
-                }));
-                setSubServices(filteredData);
-            } else {
-                console.error('Expected data.data to be an array, but got:', data);
-                setSubServices([]);
-            }
+      const response = await fetch(`http://192.168.29.67:3000/api/v1/services/selectedSubServices/${shopPhoneNumber}/${mainServiceId}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data && Array.isArray(data.data)) {
+          const filteredData = data.data
+            .filter(subService => 
+              subService.subService?.id && subService.subService?.name && subService.price
+            )
+            .map(subService => ({
+              id: subService.subService.id.toString(),
+              subServiceName: subService.subService.name,
+              subServicePrice: subService.price.toString(),
+              shopkeeperPhoneNumber: subService.phoneNumber // Ensure this is available
+            }));
+          console.log('Filtered Data:', filteredData); // Log filtered data
+          setSubServices(filteredData);
         } else {
-            console.error('Failed to fetch selected sub services:', response.statusText);
+          console.error('Expected data.data to be an array, but got:', data);
+          setSubServices([]);
         }
+      } else {
+        console.error('Failed to fetch selected sub services:', response.statusText);
+      }
     } catch (error) {
-        console.error('Error fetching selected sub services:', error);
+      console.error('Error fetching selected sub services:', error);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-};
-
+  };
 
   const fetchShopDetails = async () => {
     try {
@@ -58,71 +61,48 @@ const SubServices = ({ route }) => {
     }
   };
 
-  const renderSubService = ({ item }) => (
-    <View style={styles.card}>
+  const renderSubService = ({ item }) => {
+    console.log('Rendering item:', item); // Add this line to log the item
+    
+    return (
+      <View style={styles.card}>
         <View style={styles.detailsContainer}>
-            <Text style={styles.subServiceName}>{item.subServiceName}</Text>
-            <Text style={styles.subServicePrice}>Price: ₹{item.subServicePrice}</Text>
-            {userType === 'customer' && (
-                <TouchableOpacity onPress={() => addToCart(custPhoneNumber, item, shopPhoneNumber, shopID, 'service')} style={styles.addToCartButton}>
-                    <Text style={styles.addToCartButtonText}>Add to Cart</Text>
-                </TouchableOpacity>
-            )}
+          <Text style={styles.subServiceName}>{item.subServiceName}</Text>
+          <Text style={styles.subServicePrice}>Price: ₹{item.subServicePrice}</Text>
+          {userType === 'customer' && (
+            <TouchableOpacity 
+              onPress={() => addToCart(custPhoneNumber, item, '', item.shopkeeperPhoneNumber, shopID, 'service')} 
+              style={styles.addToCartButton}
+            >
+              <Text style={styles.addToCartButtonText}>Add to Cart</Text>
+            </TouchableOpacity>
+          )}
+          <Text style={styles.shopkeeperPhoneNumber}>Shopkeeper Phone Number: {item.shopkeeperPhoneNumber}</Text>
         </View>
-    </View>
-);
-
-  const formatData = (data, numColumns) => {
-    if (!Array.isArray(data)) {
-      console.error('Expected data to be an array, but got:', data);
-      return [];
-    }
-
-    const numberOfFullRows = Math.floor(data.length / numColumns);
-    let numberOfElementsLastRow = data.length - (numberOfFullRows * numColumns);
-
-    while (numberOfElementsLastRow !== numColumns && numberOfElementsLastRow !== 0) {
-      data.push({ id: `blank-${numberOfElementsLastRow}`, empty: true });
-      numberOfElementsLastRow++;
-    }
-
-    return data;
+      </View>
+    );
   };
-
-  const numColumns = 2;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Welcome: {firstcustomerName}</Text>
+      <Text style={styles.welcomeText}>Welcome: {firstCustomerName}</Text>
       <Text style={styles.welcomeText}>Shop Phone number: {shopPhoneNumber}</Text>
-
       {loading ? (
-    <ActivityIndicator size="large" color="#0000ff" />
-) : subServices.length === 0 ? (
-    <Text>No sub services found for this main service</Text>
-) : (
-    <FlatList
-        data={subServices}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => item.id && item.subServiceName && item.subServicePrice ? (
-            <View style={styles.card}>
-                <View style={styles.detailsContainer}>
-                    <Text style={styles.subServiceName}>{item.subServiceName}</Text>
-                    <Text style={styles.subServicePrice}>Price: ₹{item.subServicePrice}</Text>
-                    {userType === 'customer' && (
-                        <TouchableOpacity onPress={() => addToCart(custPhoneNumber, item, shopPhoneNumber, shopID, 'service')} style={styles.addToCartButton}>
-                            <Text style={styles.addToCartButtonText}>Add to Cart</Text>
-                        </TouchableOpacity>
-                    )}
-                </View>
-            </View>
-        ) : null}
-        numColumns={2}
-    />
-)}
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : subServices.length === 0 ? (
+        <Text>No sub services found for this main service</Text>
+      ) : (
+        <FlatList
+          data={subServices}
+          keyExtractor={(item) => item.id}
+          renderItem={renderSubService}
+          numColumns={2}
+        />
+      )}
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

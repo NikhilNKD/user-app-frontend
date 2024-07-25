@@ -4,8 +4,8 @@ import { useCart, useCustomer } from '../../Context/ContextApi';
 import { useNavigation } from '@react-navigation/native';
 
 const CartScreen = () => {
-  const { cartItems, removeFromCart, setCartItems, custPhoneNumber, shopID } = useCart();
-  const { firstCustomerName, shopkeeperPhoneNumber } = useCustomer();
+  const { cartItems, removeFromCart, setCartItems, custPhoneNumber, shopID, shopkeeperPhoneNumber } = useCart();
+  const { firstCustomerName } = useCustomer();
   const navigation = useNavigation();
 
   const renderItem = ({ item }) => (
@@ -97,9 +97,9 @@ const CartScreen = () => {
         />
       )}
       <View style={styles.footerContainer}>
-        <Text style={styles.totalPrice}>Total Price: ${calculateTotalPrice()}</Text>
-        <TouchableOpacity onPress={handlePayAtShop} style={styles.payButton}>
-          <Text style={styles.payButtonText}>Proceed To Pay</Text>
+        <Text style={styles.totalPrice}>Total Price: ₹{calculateTotalPrice()}</Text>
+        <TouchableOpacity onPress={handlePayAtShop} style={styles.checkoutButton}>
+          <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
         </TouchableOpacity>
       </View>
     </View>

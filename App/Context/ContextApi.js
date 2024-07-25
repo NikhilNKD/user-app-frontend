@@ -36,7 +36,7 @@ export const CartProvider = ({ children }) => {
   // Function to add item to cart for a specific customer
   const addToCart = (custPhoneNumber, item, shopkeeperName, shopkeeperPhoneNumber, shopID, type = 'product') => {
     const updatedCartItems = { ...cartItems };
-  
+    console.log('Add to Cart Called with:', { custPhoneNumber, item, shopkeeperPhoneNumber, shopID, type });
     if (!updatedCartItems[custPhoneNumber]) {
       updatedCartItems[custPhoneNumber] = [];
     }

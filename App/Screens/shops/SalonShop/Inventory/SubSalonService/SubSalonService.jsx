@@ -64,7 +64,7 @@ export default function SubSalonService({ route, navigation }) {
 
     const goToMyServices = async () => {
         try {
-            await fetch('http://192.168.29.67:3000/api/v1//services/saveSelectedServices', {
+            await fetch('http://192.168.29.67:3000/api/v1/services/saveSelectedServices', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
