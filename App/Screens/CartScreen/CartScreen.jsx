@@ -1,32 +1,42 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, VirtualizedList } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
 import { useCart, useCustomer } from '../../Context/ContextApi';
 import { useNavigation } from '@react-navigation/native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
+import moment from 'moment';
+import { MaterialIcons } from '@expo/vector-icons';
 
 const CartScreen = () => {
   const { cartItems, removeFromCart, setCartItems, custPhoneNumber, shopID, shopkeeperPhoneNumber } = useCart();
   const { firstCustomerName } = useCustomer();
   const navigation = useNavigation();
 
-  const renderItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <Text style={styles.itemName}>{item.main_category}</Text>
-      <Text>Name: {item.type === 'service' ? item.subServiceName : item.product_name}</Text>
-      {item.type !== 'service' && <Text>Brand: {item.brand_name}</Text>}
-      <Text>Store Name: {item.shopID}</Text>
-      {item.type !== 'service' && <Text>Weight: {item.weight}</Text>}
-      <Text>Phone number: {item.shopkeeperPhoneNumber}</Text>
-      <View style={styles.quantityContainer}>
-        <TouchableOpacity onPress={() => updateQuantity(item.id, -1)} style={styles.quantityButton}>
-          <Text style={styles.quantityButtonText}>-</Text>
-        </TouchableOpacity>
-        <Text style={styles.itemQuantity}>{item.quantity}</Text>
-        <TouchableOpacity onPress={() => updateQuantity(item.id, 1)} style={styles.quantityButton}>
-          <Text style={styles.quantityButtonText}>+</Text>
-        </TouchableOpacity>
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedTime, setSelectedTime] = useState(null);
+
+  const renderItem = (item) => (
+    <View key={item.id} style={styles.itemContainer}>
+      <View style={styles.itemInfoContainer}>
+        <Text style={styles.itemName}>{item.main_category}</Text>
+        <Text>Name: {item.type === 'service' ? item.subServiceName : item.product_name}</Text>
+        {item.type !== 'service' && <Text>Brand: {item.brand_name}</Text>}
+        <Text>Store Name: {item.shopID}</Text>
+        {item.type !== 'service' && <Text>Weight: {item.weight}</Text>}
+        <Text>Phone number: {item.shopkeeperPhoneNumber}</Text>
+        <View style={styles.quantityContainer}>
+          <TouchableOpacity onPress={() => updateQuantity(item.id, -1)} style={styles.quantityButton}>
+            <Text style={styles.quantityButtonText}>-</Text>
+          </TouchableOpacity>
+          <Text style={styles.itemQuantity}>{item.quantity}</Text>
+          <TouchableOpacity onPress={() => updateQuantity(item.id, 1)} style={styles.quantityButton}>
+            <Text style={styles.quantityButtonText}>+</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <TouchableOpacity onPress={() => removeFromCart(custPhoneNumber, item.id)} style={styles.removeButton}>
-        <Text style={styles.removeButtonText}>Remove</Text>
+        <MaterialIcons name="remove-circle" size={24} color="red" />
       </TouchableOpacity>
     </View>
   );
@@ -63,38 +73,70 @@ const CartScreen = () => {
       firstCustomerName,
       custPhoneNumber,
       shopkeeperPhoneNumber,
-      shopID
+      shopID,
+      selectedDate: selectedDate.toISOString(),
+      selectedTime: selectedTime.toISOString(),
     });
   };
 
-  const getItemCount = () => {
-    return cartItems[custPhoneNumber] ? cartItems[custPhoneNumber].length : 0;
+  const showDatePicker = () => {
+    setDatePickerVisibility(true);
   };
 
-  const getItem = (data, index) => {
-    return data[index];
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  const handleDateConfirm = (date) => {
+    setSelectedDate(date);
+    hideDatePicker();
+    showTimePicker();
+  };
+
+  const showTimePicker = () => {
+    setTimePickerVisibility(true);
+  };
+
+  const hideTimePicker = () => {
+    setTimePickerVisibility(false);
+  };
+
+  const handleTimeConfirm = (time) => {
+    setSelectedTime(time);
+    hideTimePicker();
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.headerContainer}>
         <Image source={require("../../../assets/logo.png")} style={styles.storeImage} />
         <View style={styles.headerText}>
-          <Text style={styles.welcomeText}>Welcome: {firstCustomerName}</Text>
+          <Text style={styles.welcomeText}>Welcome: {firstCustomerName}{custPhoneNumber}</Text>
         </View>
       </View>
       {cartItems[custPhoneNumber] && cartItems[custPhoneNumber].length === 0 ? (
         <Text style={styles.emptyCartText}>Your cart is empty!</Text>
       ) : (
-        <VirtualizedList
-          data={cartItems[custPhoneNumber]}
-          initialNumToRender={10}
-          renderItem={renderItem}
-          keyExtractor={item => item.id.toString()}
-          getItemCount={getItemCount}
-          getItem={getItem}
-          contentContainerStyle={styles.flatListContent}
-        />
+        cartItems[custPhoneNumber].map(item => renderItem(item))
+      )}
+      {cartItems[custPhoneNumber] && cartItems[custPhoneNumber].some(item => item.type === 'service') && (
+        <View style={styles.appointmentContainer}>
+          <TouchableOpacity
+            onPress={() => {
+              showDatePicker();
+            }}
+            style={styles.appointmentButton}
+          >
+            <Text style={styles.appointmentButtonText}>Schedule Appointment</Text>
+          </TouchableOpacity>
+          {selectedDate && selectedTime && (
+            <View style={styles.appointmentSummaryContainer}>
+              <Text style={styles.appointmentSummaryTitle}>Appointment Details:</Text>
+              <Text style={styles.appointmentSummaryText}>Date: {moment(selectedDate).format('YYYY-MM-DD')}</Text>
+              <Text style={styles.appointmentSummaryText}>Time: {moment(selectedTime).format('HH:mm')}</Text>
+            </View>
+          )}
+        </View>
       )}
       <View style={styles.footerContainer}>
         <Text style={styles.totalPrice}>Total Price: ₹{calculateTotalPrice()}</Text>
@@ -102,13 +144,25 @@ const CartScreen = () => {
           <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
         </TouchableOpacity>
       </View>
-    </View>
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleDateConfirm}
+        onCancel={hideDatePicker}
+      />
+      <DateTimePickerModal
+        isVisible={isTimePickerVisible}
+        mode="time"
+        onConfirm={handleTimeConfirm}
+        onCancel={hideTimePicker}
+      />
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#fff',
   },
   headerContainer: {
@@ -128,17 +182,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  shoppingAt: {
-    fontSize: 14,
-  },
   emptyCartText: {
     textAlign: 'center',
     marginTop: 20,
     fontSize: 16,
     color: '#555',
-  },
-  flatListContent: {
-    paddingBottom: 100, // Ensure there's enough space at the bottom
   },
   itemContainer: {
     marginBottom: 12,
@@ -148,14 +196,16 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#f9f9f9',
     marginHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  itemInfoContainer: {
+    flex: 1,
   },
   itemName: {
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  itemPrice: {
-    fontSize: 14,
-    color: '#333',
   },
   quantityContainer: {
     flexDirection: 'row',
@@ -174,41 +224,68 @@ const styles = StyleSheet.create({
   itemQuantity: {
     marginHorizontal: 12,
     fontSize: 16,
+    color: '#333',
   },
   removeButton: {
-    marginTop: 8,
-    backgroundColor: 'red',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 5,
-    alignItems: 'center',
+    marginLeft: 12,
   },
-  removeButtonText: {
-    color: '#fff',
+  appointmentContainer: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    marginTop: 16,
+  },
+  appointmentButton: {
+    padding: 12,
+    borderRadius: 5,
+    borderColor: '#007BFF',
+    borderWidth: 1,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  appointmentButtonText: {
+    fontSize: 16,
+    color: '#007BFF',
+    textAlign: 'center',
+  },
+  appointmentSummaryContainer: {
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#ddd',
+    marginTop: 16,
+  },
+  appointmentSummaryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  appointmentSummaryText: {
+    fontSize: 16,
+    textAlign: 'center',
   },
   footerContainer: {
     padding: 16,
-    backgroundColor: '#fff',
     borderTopWidth: 1,
-    borderColor: '#ccc',
+    borderTopColor: '#ddd',
     alignItems: 'center',
   },
   totalPrice: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 12,
   },
-  payButton: {
-    backgroundColor: 'green',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+  checkoutButton: {
+    backgroundColor: '#007BFF',
+    padding: 12,
     borderRadius: 5,
+    marginTop: 12,
+    width: '100%',
     alignItems: 'center',
   },
-  payButtonText: {
+  checkoutButtonText: {
     color: '#fff',
     fontSize: 16,
   },
 });
 
-export default CartScreen
+export default CartScreen;

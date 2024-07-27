@@ -19,102 +19,47 @@ export default function OtpScreen2({ route }) {
         setIsCorrectOtp(true);
     };
 
-    //const handleSubmit = async () => {
-    //    const correctOtp = '1234'; // Example correct OTP
-    
-    //    // Perform OTP verification
-    //    if (otp === correctOtp) {
-    //        setIsCorrectOtp(true);
-    
-    //        try {
-    //            const response = await fetch('http://192.168.29.67:3000/api/v1/auth/login', {
-    //                method: 'POST',
-    //                headers: {
-    //                    'Content-Type': 'application/json',
-    //                },
-    //                body: JSON.stringify({ phoneNumber, userType }),
-    //            });
-    
-    //            const data = await response.json();
-    
-    //            if (response.ok) {
-    //                if (userType === 'shopkeeper') {
-    //                    // Fetch shopkeeper details
-    //                    const shopkeeperResponse = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeper?phoneNumber=${phoneNumber}`);
-    //                    const shopkeeperData = await shopkeeperResponse.json();
-    //                    const selectedCategory = shopkeeperData.selectedCategory;
-    
-    //                    // Fetch category details
-    //                    const categoryResponse = await fetch(`http://192.168.29.67:3000/api/v1/category?name=${selectedCategory}`);
-    //                    const categoryData = await categoryResponse.json();
-    
-    //                    if (categoryData && categoryData.type) {
-    //                        const shopkeeperType = categoryData.type;
-    
-    //                        if (shopkeeperType === 'service') {
-    //                            navigation.navigate('ShopkeeperHome', { phoneNumber, userType: 'shopkeeper', shopkeeperType, selectedCategory });
-    //                        } else if (shopkeeperType === 'product') {
-    //                            navigation.navigate('ShopkeeperProductHome', { phoneNumber, userType: 'shopkeeper', shopkeeperType, selectedCategory });
-    //                        }
-    //                    } else {
-    //                        console.error('Category type not found');
-    //                    }
-    //                } else if (userType === 'customer') {
-    //                    navigation.navigate('CustomerHomePage', { phoneNumber, userType });
-    //                } else if (userType === 'unregistered') {
-    //                    navigation.navigate('Register', { phoneNumber, userType });
-    //                }
-    //            } else {
-    //                console.error('Error:', data.message); // Ensure to log `data.message` for correct error message
-    //            }
-    //        } catch (error) {
-    //            console.error('Error:', error);
-    //        }
-    //    } else {
-    //        setIsCorrectOtp(false);
-    //    }
-    //};
-    
-    
     const handleSubmit = async () => {
-        const correctOtp = '1234'; // Example correct OTP
+        try {
+            const correctOtp = '1234'; // Example correct OTP
     
-        // Perform OTP verification
-        if (otp === correctOtp) {
-            setIsCorrectOtp(true);
+            // Perform OTP verification
+            if (otp === correctOtp) {
+                setIsCorrectOtp(true);
     
-            if (userType === 'shopkeeper') {
-                try {
-                    // Fetch shopkeeper details
-                    const shopkeeperResponse = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeper?phoneNumber=${phoneNumber}`);
-                    const shopkeeperData = await shopkeeperResponse.json();
-                    const selectedCategory = shopkeeperData.selectedCategory;
-
-                    // Fetch category details
-                    const categoryResponse = await fetch(`http://192.168.29.67:3000/api/v1/category?name=${selectedCategory}`);
-                    const categoryData = await categoryResponse.json();
-
-                    if (categoryData && categoryData.type) {
-                        const shopkeeperType = categoryData.type;
-
-                        if (shopkeeperType === 'service') {
-                            navigation.navigate('ShopkeeperHome', { phoneNumber, userType: 'shopkeeper', shopkeeperType, selectedCategory });
-                        } else if (shopkeeperType === 'product') {
-                            navigation.navigate('ShopkeeperProductHome', { phoneNumber, userType: 'shopkeeper', shopkeeperType, selectedCategory });
-                        }
-                    } else {
-                        console.error('Category type not found');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
+                const response = await fetch('http://192.168.29.67:3000/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ phoneNumber, userType }),
+                });
+    
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Server Error: ${errorText}`);
                 }
-            } else if (userType === 'customer') {
-                navigation.navigate('CustomerHomePage', { phoneNumber, userType });
-            } else if (userType === 'unregistered') {
-                navigation.navigate('Register', { phoneNumber, userType });
+    
+                const data = await response.json();
+    
+                if (data.status === 'unregistered') {
+                    // Handle unregistered user case
+                    navigation.navigate('Register', { phoneNumber, userType });
+                } else if (userType === 'shopkeeper') {
+                    const { shopkeeperType, selectedCategory } = data;
+                    if (shopkeeperType === 'service') {
+                        navigation.navigate('ShopkeeperHome', { phoneNumber, userType: 'shopkeeper', shopkeeperType, selectedCategory });
+                    } else if (shopkeeperType === 'product') {
+                        navigation.navigate('ShopkeeperProductHome', { phoneNumber, userType: 'shopkeeper', shopkeeperType, selectedCategory });
+                    }
+                } else if (userType === 'customer') {
+                    navigation.navigate('CustomerHomePage', { phoneNumber, userType });
+                }
+            } else {
+                setIsCorrectOtp(false);
             }
-        } else {
-            setIsCorrectOtp(false);
+        } catch (error) {
+            console.error('Error:', error.message);
         }
     };
 
@@ -180,7 +125,6 @@ export default function OtpScreen2({ route }) {
         </View>
     );
 }
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,

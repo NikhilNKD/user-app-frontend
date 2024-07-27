@@ -52,7 +52,8 @@ const SubServices = ({ route }) => {
       const response = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeperDetails/service/${shopPhoneNumber}`);
       if (response.ok) {
         const data = await response.json();
-        setShopID(data.shopID);
+        console.log('Fetched Shop Details:', data); // Log the data for debugging
+        setShopID(data.data.shopID); // Ensure `data.data.shopID` is correctly assigned
       } else {
         console.error('Failed to fetch shop details:', response.statusText);
       }
@@ -60,6 +61,7 @@ const SubServices = ({ route }) => {
       console.error('Error fetching shop details:', error);
     }
   };
+  
 
   const renderSubService = ({ item }) => {
     console.log('Rendering item:', item); // Add this line to log the item
@@ -77,7 +79,7 @@ const SubServices = ({ route }) => {
               <Text style={styles.addToCartButtonText}>Add to Cart</Text>
             </TouchableOpacity>
           )}
-          <Text style={styles.shopkeeperPhoneNumber}>Shopkeeper Phone Number: {item.shopkeeperPhoneNumber}</Text>
+        
         </View>
       </View>
     );

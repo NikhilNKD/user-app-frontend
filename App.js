@@ -9,7 +9,6 @@ import { Ionicons } from '@expo/vector-icons';
 // Import your screens here
 import HomeScreen from './App/Screens/HomeScreen/HomeScreen';
 import MoreScreen from './App/Screens/MoreScreen/MoreScreen';
-import AnotherScreen from './App/Screens/AnotherScreen/AnotherScreen';
 import OtpScreen1 from './App/Screens/OtpScreen/OtpScreen1.jsx';
 import OtpScreen2 from './App/Screens/OtpScreen/OtpScreen2.jsx';
 import ShopkeeperScreen from './App/Screens/RegisterScreen/ShopkeeperScreen.jsx';
@@ -21,7 +20,6 @@ import Orders from './App/Screens/CustomerHomePage/CustomerHomeCards/Orders/Orde
 import MyAddress from './App/Screens/CustomerHomePage/CustomerHomeCards/MyAddress/MyAddress.jsx';
 import PreferredShops from './App/Screens/CustomerHomePage/CustomerHomeCards/PreferredShops/PreferredShops.jsx';
 import ChangePincode from './App/Screens/CustomerHomePage/CustomerHomeCards/SearchShops/ChangePincode.jsx';
-import OptionScreen from './App/Screens/OptionScreen/OptionScreen.jsx';
 import CustomDrawer from './App/Components/CustomDrawer/CustomDrawer.jsx';
 import StoreScreen from './App/Screens/CustomerHomePage/StoreScreen/StoreScreen.jsx';
 import CartScreen from './App/Screens/CartScreen/CartScreen.jsx';
@@ -32,12 +30,6 @@ import Checkout from './App/Screens/CartScreen/Checkout/Checkout.jsx';
 import AddNewAddress from './App/Screens/CartScreen/AddNewAddress/AddNewAddress.jsx';
 import Pay from './App/Screens/CartScreen/Pay/Pay.jsx';
 import ViewOrder from './App/Screens/CustomerHomePage/CustomerHomeCards/Orders/ViewOrder/ViewOrder.jsx';
- 
- 
-import BarberHomePage from './App/Screens/CustomerHomePage/BarberHomePage/BarberHomePage.jsx';
-import BarberSearchShops from './App/Screens/CustomerHomePage/BarberHomePage/BarberSearchShops.jsx';
-import SalonsServices from './App/Screens/CustomerHomePage/BarberHomePage/SalonsServices.jsx';
-import SalonProducts from './App/Screens/CustomerHomePage/BarberHomePage/SalonProducts.jsx';
 import UploadBanner from './App/Screens/RegisterScreen/UploadBanner.jsx';
 import Subscription from './App/Screens/Subscription/Subscription.jsx';
 import ShopkeeperPay from './App/Screens/RegisterScreen/ShopkeeperPay/ShopkeeperPay.jsx';
@@ -50,11 +42,7 @@ import ShopkeeperPayments from './App/Screens/RegisterScreen/ShopkeeperPay/Shopk
 import Privacy from './App/Screens/PrivacyAndConditions/Privacy.jsx';
 import Conditions from './App/Screens/PrivacyAndConditions/Conditions.jsx';
 import Inventory from './App/Screens/shops/SalonShop/Inventory/Inventory.jsx';
-import GroceryShop from './App/Screens/shops/GroceryShop/GroceryShop.jsx';
 import SalonShop from './App/Screens/shops/SalonShop/SalonShop.jsx';
-import BeautyPalor from './App/Screens/shops/BeautyPalor/BeautyPalor.jsx';
-import SweetsAndNamkeenShop from './App/Screens/shops/SweetsAndNamkeenShop/SweetsAndNamkeenShop.jsx';
-import StationaryShop from './App/Screens/shops/StationaryShop/StationaryShop.jsx';
 import MyServices from './App/Screens/shops/SalonShop/MyServices/MyServices.jsx';
 import SalonProfile from './App/Screens/shops/SalonShop/SalonProfile/SalonProfile.jsx';
 import SubSalonService from './App/Screens/shops/SalonShop/Inventory/SubSalonService/SubSalonService.jsx';
@@ -86,8 +74,6 @@ function StackNavigator({ formSubmitted }) {
   return (
     <Stack.Navigator>
       <Stack.Screen name="HomePage" component={HomeScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="More" component={MoreScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="Another" component={AnotherScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Otp1" component={OtpScreen1} options={{ headerShown: false }}   />
       <Stack.Screen name="Otp2" component={OtpScreen2} options={{ headerShown: false }}  />
       <Stack.Screen name="Register" component={RegisterationMainScreen} options={{ headerShown: false }}  />
@@ -106,11 +92,6 @@ function StackNavigator({ formSubmitted }) {
       <Stack.Screen name="AddNewAddress" component={AddNewAddress}options={{ headerShown: false }} />
       <Stack.Screen name="Pay" component={Pay}options={{ headerShown: false }} />
       <Stack.Screen name="ViewOrder" component={ViewOrder}options={{ headerShown: false }} />  
-   
-      <Stack.Screen name="Barber" component={BarberHomePage}options={{ headerShown: false }} />
-      <Stack.Screen name="BarberSearchShops" component={BarberSearchShops}options={{ headerShown: false }} />
-      <Stack.Screen name="Salons" component={SalonsServices}options={{ headerShown: false }} />
-      <Stack.Screen name="SalonProduct" component={SalonProducts}options={{ headerShown: false }} />
       <Stack.Screen name="Upload" component={UploadBanner}options={{ headerShown: false }} />
       <Stack.Screen name="Subscription" component={Subscription}options={{ headerShown: false }} />
       <Stack.Screen name="ShopkeeperPay" component={ShopkeeperPay}options={{ headerShown: false }} />
@@ -123,11 +104,7 @@ function StackNavigator({ formSubmitted }) {
       <Stack.Screen name="Privacy" component={Privacy}options={{ headerShown: false }} />
       <Stack.Screen name="Conditions" component={Conditions}options={{ headerShown: false }} />
       <Stack.Screen name="Inventory" component={Inventory}options={{ headerShown: false }} />
-      <Stack.Screen name="GroceryShop" component={GroceryShop}options={{ headerShown: false }} />
       <Stack.Screen name="SalonShop" component={SalonShop}options={{ headerShown: false }} />
-      <Stack.Screen name="BeautyPalor" component={BeautyPalor}options={{ headerShown: false }} />
-      <Stack.Screen name="SweetsAndNamkeenShop" component={SweetsAndNamkeenShop}options={{ headerShown: false }} />
-      <Stack.Screen name="StationaryShop" component={StationaryShop}options={{ headerShown: false }} />
       <Stack.Screen name="MyServices" component={MyServices}options={{ headerShown: false }} />
       <Stack.Screen name="SalonProfile" component={SalonProfile}options={{ headerShown: false }} />
       <Stack.Screen name="SubSalonService" component={SubSalonService}options={{ headerShown: false }} />
@@ -184,7 +161,7 @@ function MyDrawer() {
   return (
     <Drawer.Navigator initialRouteName="NKD" drawerContent={(props) => <CustomDrawer {...props} />}>
       <Drawer.Screen name="NKD" component={TabNavigator} />
-      <Drawer.Screen name="AboutUs" component={AnotherScreen} />
+    
       <Drawer.Screen name="Register as an Associate" component={MobileSales} />
       <Drawer.Screen name="Privacy Policy" component={MoreScreen} />
       <Drawer.Screen name="Terms & Conditions" component={MoreScreen} />

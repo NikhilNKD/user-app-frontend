@@ -3,7 +3,21 @@ import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } fr
 import { useNavigation } from '@react-navigation/native';
 
 const Checkout = ({ route }) => {
-  const { cartItems, totalPrice, shopID, custName, selectedDate, selectedTime, firstCustomerName, custPhoneNumber } = route.params;
+  const {
+    cartItems,
+    totalPrice,
+    shopID,
+    custName,
+    selectedDate: selectedDateString,
+    selectedTime: selectedTimeString,
+    firstCustomerName,
+    custPhoneNumber
+  } = route.params;
+
+  // Convert ISO strings back to Date objects
+  const selectedDate = new Date(selectedDateString);
+  const selectedTime = new Date(selectedTimeString);
+
   const navigation = useNavigation();
   const [shopkeeperDetails, setShopkeeperDetails] = useState({});
 
@@ -20,23 +34,20 @@ const Checkout = ({ route }) => {
   useEffect(() => {
     const fetchShopkeeperDetails = async () => {
       const shopkeeperPhones = [...new Set(cartItems.map(item => item.shopkeeperPhoneNumber))];
+
       for (const phoneNumber of shopkeeperPhones) {
         try {
-          console.log(`Fetching details for phone number: ${phoneNumber}`); // Debugging line
           const response = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeperDetails/details/${phoneNumber}`);
           if (response.ok) {
             const data = await response.json();
-            console.log('Fetched shopkeeper details:', data); // Debugging line
             setShopkeeperDetails(prevDetails => ({
               ...prevDetails,
               [phoneNumber]: data,
             }));
           } else {
-            console.error('Failed to fetch shopkeeper details:', response.status); // Debugging line
             Alert.alert('Failed to fetch shopkeeper details. Please try again.');
           }
         } catch (error) {
-          console.error('Error fetching shopkeeper details:', error);
           Alert.alert('Failed to fetch shopkeeper details. Please try again.');
         }
       }
@@ -50,22 +61,24 @@ const Checkout = ({ route }) => {
       for (const [shopID, items] of Object.entries(groupedCartItems)) {
         const shopkeeperPhoneNumber = items[0]?.shopkeeperPhoneNumber;
         const shopkeeperName = shopkeeperDetails[shopkeeperPhoneNumber]?.shopkeeperName || items[0]?.shopkeeperName;
-  
+
         // Calculate total price for the current shop
-        const shopTotalPrice = items.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0);
-  
+        const shopTotalPrice = items.reduce((sum, item) => {
+          return sum + (item.price || 0) * (item.quantity || 0);
+        }, 0);
+
         const orderData = {
           custName: firstCustomerName,
           cartItems: items,
           totalPrice: shopTotalPrice, // Total price for the current shop
           selectedDate,
           selectedTime,
-          shopID, // Current shopID from the loop (store name)
+          shopID,
           shopkeeperName,
           custPhoneNumber,
           shopkeeperPhoneNumber,
         };
-  
+
         const response = await fetch('http://192.168.29.67:3000/api/v1/customerOrders/saveOrder', {
           method: 'POST',
           headers: {
@@ -73,25 +86,22 @@ const Checkout = ({ route }) => {
           },
           body: JSON.stringify(orderData),
         });
-  
+
         if (!response.ok) {
           throw new Error('Failed to save the order.');
         }
-  
-        console.log('Order data:', orderData);
+
         Alert.alert('Order placed successfully!');
       }
-  
-      navigation.navigate('Pay', { custPhoneNumber: custPhoneNumber }); // Navigate to the payment screen
+
+      navigation.navigate('Pay', { custPhoneNumber: custPhoneNumber });
     } catch (error) {
-      console.error('Error saving order:', error);
       Alert.alert('Failed to save the order. Please try again.');
     }
   };
-  
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {/* Header section */}
       <View style={styles.headerContainer}>
         <Image source={require('../../../../assets/logo.png')} style={styles.storeImage} />
         <View style={styles.headerText}>
@@ -100,42 +110,49 @@ const Checkout = ({ route }) => {
         </View>
       </View>
 
-      {/* Checkout title */}
       <View>
         <Text style={styles.checkout}>CheckOut</Text>
       </View>
 
-      {/* Display cart items grouped by shop */}
-      {Object.keys(groupedCartItems).map(shopID => (
-        <View key={shopID}>
-          <Text style={styles.shopHeader}>Shop ID: {shopID}</Text>
-          {groupedCartItems[shopID].map((item, index) => (
-            <View key={item.id}>
-              {/* Item details */}
-              <View style={styles.itemContainer}>
-                <View style={styles.itemDetails}>
-                  <Text style={styles.itemText}>{item.product_name || item.service_name}</Text>
-                  <Text style={styles.itemPrice}>Price: ₹{item.price}</Text>
-                  <Text style={styles.itemQuantity}>Quantity: {item.quantity}</Text>
-                  <Text style={styles.itemTotal}>Total: ₹{item.price * item.quantity}</Text>
-                  <Text style={styles.itemTotal}>Shopkeeper Phone: {item.shopkeeperPhoneNumber}</Text>
-                </View>
-              </View>
-              {/* Divider between items */}
-              {index < groupedCartItems[shopID].length - 1 && <View style={styles.line} />}
-            </View>
-          ))}
-        </View>
-      ))}
+      {Object.keys(groupedCartItems).map(shopID => {
+        const items = groupedCartItems[shopID];
+        const shopkeeperPhoneNumber = items[0]?.shopkeeperPhoneNumber;
+        const shopkeeperName = shopkeeperDetails[shopkeeperPhoneNumber]?.shopkeeperName || items[0]?.shopkeeperName;
 
-      {/* Display total price */}
+        return (
+          <View key={shopID} style={styles.cardContainer}>
+            <Text style={styles.shopHeader}>Shop ID: {shopID}</Text>
+            <Text style={styles.cardDetails}>Shopkeeper Name: {shopkeeperName}</Text>
+            <Text style={styles.cardDetails}>Shopkeeper Phone: {shopkeeperPhoneNumber}</Text>
+            {items.map((item, index) => (
+              <View key={item.id} style={styles.card}>
+                {item.type === 'product' ? (
+                  <>
+                    <Text style={styles.cardTitle}>{item.product_name}</Text>
+                    <Text style={styles.cardDetails}>Price: ₹{item.price}</Text>
+                    <Text style={styles.cardDetails}>Quantity: {item.quantity}</Text>
+                    <Text style={styles.cardDetails}>Total: ₹{(item.price || 0) * (item.quantity || 0)}</Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.cardDetails}>Service Name: {item.subServiceName}</Text>
+                    <Text style={styles.cardDetails}>Appointment Date: {selectedDate.toDateString()}</Text>
+                    <Text style={styles.cardDetails}>Appointment Time: {selectedTime.toLocaleTimeString()}</Text>
+                  </>
+                )}
+                {index < items.length - 1 && <View style={styles.line} />}
+              </View>
+            ))}
+          </View>
+        );
+      })}
+
       <Text style={styles.totalPrice}>Total Price: ₹{totalPrice}</Text>
 
-      {/* Payment button */}
       <View style={styles.paymentContainer}>
         <TouchableOpacity
           style={styles.paymentButton}
-          onPress={saveOrder} // Call saveOrder function on button press
+          onPress={saveOrder}
         >
           <Text style={styles.paymentButtonText}>Pay At Shop</Text>
         </TouchableOpacity>
@@ -174,51 +191,25 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginVertical: 16,
   },
-  shopHeader: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginVertical: 10,
+  cardContainer: {
+    marginBottom: 16,
   },
-  itemContainer: {
-    marginBottom: 12,
+  card: {
     padding: 12,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 8,
     backgroundColor: '#f9f9f9',
+    marginBottom: 12,
   },
-  itemDetails: {
-    marginBottom: 8,
-  },
-  itemText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  itemPrice: {
-    fontSize: 14,
-    color: '#333',
-  },
-  itemQuantity: {
-    fontSize: 14,
-  },
-  itemTotal: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  shopkeeperDetailsContainer: {
-    marginVertical: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    backgroundColor: '#f9f9f9',
-  },
-  shopkeeperDetailsTitle: {
+  cardTitle: {
     fontSize: 18,
     fontWeight: 'bold',
+    marginBottom: 8,
   },
-  shopkeeperDetail: {
+  cardDetails: {
     fontSize: 14,
+    marginBottom: 4,
   },
   line: {
     height: 1,
@@ -231,17 +222,18 @@ const styles = StyleSheet.create({
     marginVertical: 16,
   },
   paymentContainer: {
-    alignItems: 'center',
+    marginTop: 20,
   },
   paymentButton: {
-    backgroundColor: '#007BFF',
-    padding: 15,
+    backgroundColor: '#007bff',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     borderRadius: 8,
   },
   paymentButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: 'bold',
+    textAlign: 'center',
   },
 });
 
