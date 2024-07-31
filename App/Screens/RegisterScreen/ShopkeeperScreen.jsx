@@ -105,7 +105,7 @@ export default function ShopkeeperScreen({ route }) {
     
     const checkSalesAssociateNumber = async (number) => {
         try {
-            const response = await fetch(`http://192.168.29.67:3000/checkSalesAssociate/${number}`);
+            const response = await fetch(`http://192.168.29.67:3000/api/v1/sales/check-sales-associate/${number}`);
             if (response.ok) {
                 const data = await response.json();
                 return data.exists; // Assume the API returns { exists: true/false }
@@ -349,39 +349,39 @@ export default function ShopkeeperScreen({ route }) {
                          </View>
 
                          <View style={styles.inputContainer}>
-    <Text style={styles.label}>Your Shop Category*</Text>
-    <Picker
-        selectedValue={selectedCategory}
-        onValueChange={(itemValue) => handleCategoryChange(itemValue)}
-        style={styles.picker}
-    >
-        <Picker.Item label="Select a category" value="" />
-        {categories.map((category) => (
-            <Picker.Item key={category.id} label={category.name} value={category.name} />
-        ))}
-    </Picker>
-</View>
+                            <Text style={styles.label}>Your Shop Category*</Text>
+                            <Picker
+                                selectedValue={selectedCategory}
+                                onValueChange={(itemValue) => handleCategoryChange(itemValue)}
+                                style={styles.picker}
+                            >
+                                <Picker.Item label="Select a category" value="" />
+                                {categories.map((category) => (
+                                    <Picker.Item key={category.id} label={category.name} value={category.name} />
+                                ))}
+                            </Picker>
+                        </View>
 
-{selectedCategoryId == '5' && (
-    <View style={styles.inputContainer}>
-        <Text style={styles.label}>Type of shop</Text>
-        <Picker
-            selectedValue={selectedSubCategory}
-            onValueChange={(itemValue) => {
-                setSelectedSubCategory(itemValue);
-                const subCategory = subCategories.find(sub => sub.sub_category === itemValue); // Adjust based on actual field names
-                setSelectedSubCategoryId(subCategory ? subCategory.id : '');
-            }}
-            style={styles.picker}
-            enabled={!!subCategories.length}
-        >
-            <Picker.Item label="Select a subcategory" value="" />
-            {subCategories.map((subCategory) => (
-                <Picker.Item key={subCategory.id} label={subCategory.sub_category} value={subCategory.sub_category} /> // Adjust based on actual field names
-            ))}
-        </Picker>
-    </View>
-)}
+                            {selectedCategoryId == '5' && (
+                                <View style={styles.inputContainer}>
+                                    <Text style={styles.label}>Type of shop</Text>
+                                    <Picker
+                                        selectedValue={selectedSubCategory}
+                                        onValueChange={(itemValue) => {
+                                            setSelectedSubCategory(itemValue);
+                                            const subCategory = subCategories.find(sub => sub.sub_category === itemValue); // Adjust based on actual field names
+                                            setSelectedSubCategoryId(subCategory ? subCategory.id : '');
+                                        }}
+                                        style={styles.picker}
+                                        enabled={!!subCategories.length}
+                                    >
+                                        <Picker.Item label="Select a subcategory" value="" />
+                                        {subCategories.map((subCategory) => (
+                                            <Picker.Item key={subCategory.id} label={subCategory.sub_category} value={subCategory.sub_category} /> // Adjust based on actual field names
+                                        ))}
+                                    </Picker>
+                                </View>
+                            )}
 
                 <View style={styles.inputContainer}>
                     <Button title="Add Shop Banner" onPress={() => pickImage(setShopBanner)} />

@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button } from 'react-native';
 import axios from 'axios';
 
 export default function AddTeamMember({ route, navigation }) {
-  const { mobileNumber } = route.params;
+  const { phoneNumber } = route.params;
   const [newMobileNumber, setNewMobileNumber] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -13,15 +13,15 @@ export default function AddTeamMember({ route, navigation }) {
   const [pancard, setPancard] = useState('');
 
   const handleSubmit = () => {
-    axios.post('http://192.168.29.67:3000/submit-team-member', {
-      mobileNumber: newMobileNumber,
+    axios.post('http://192.168.29.67:3000/api/v1/sales/submit-team-member', {
+      phoneNumber: newMobileNumber,
       firstName,
       lastName,
       pincode,
       aadhar,
       upi,
       pancard,
-      addedBy: mobileNumber // Using the mobile number obtained from params as "addedBy"
+      addedBy: phoneNumber // Using the mobile number obtained from params as "addedBy"
     })
     .then(response => {
       console.log('Data saved successfully');

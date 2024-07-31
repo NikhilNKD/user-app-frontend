@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button } from 'react-native';
 import axios from 'axios';
 
 export default function MyProfile({ route }) {
-  const { mobileNumber } = route.params;
+  const { phoneNumber } = route.params;
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [pincode, setPincode] = useState('');
@@ -13,7 +13,7 @@ export default function MyProfile({ route }) {
 
   useEffect(() => {
     // Fetch user's existing info
-    axios.get(`http://192.168.29.67:3000/my-profile/${mobileNumber}`)
+    axios.get(`http://192.168.29.67:3000/api/v1/sales/my-profile/${phoneNumber}`)
       .then(response => {
         const { firstName, lastName, pincode, aadhar, upi, pancard } = response.data;
         setFirstName(firstName);
@@ -26,11 +26,11 @@ export default function MyProfile({ route }) {
       .catch(error => {
         console.error('Error fetching profile:', error);
       });
-  }, [mobileNumber]);
+  }, [phoneNumber]);
 
   const handleUpdate = () => {
-    axios.post('http://192.168.29.67:3000/update-profile', {
-      mobileNumber,
+    axios.post('http://192.168.29.67:3000/api/v1/sales/update-profile', {
+      phoneNumber,
       firstName,
       lastName,
       pincode,
@@ -49,7 +49,7 @@ export default function MyProfile({ route }) {
 
   return (
     <View style={styles.container}>
-      <Text>Mobile Number: {mobileNumber}</Text>
+      <Text>Mobile Number: {phoneNumber}</Text>
       <TextInput
         style={styles.input}
         placeholder="First Name"

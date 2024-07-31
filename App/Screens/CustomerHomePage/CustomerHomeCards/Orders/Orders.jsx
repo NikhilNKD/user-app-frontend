@@ -72,7 +72,7 @@ const Orders = ({ route }) => {
         style={styles.searchShopsButton}
         onPress={() => navigation.navigate('SearchShops')}
       >
-        <Text style={styles.searchShopsButtonText}>Back to search shops{custPhoneNumber}</Text>
+        
       </TouchableOpacity>
     </View>
   );
@@ -105,18 +105,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
-  searchShopsButton: {
-    backgroundColor: '#28a745',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  searchShopsButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 18,
-  },
+  
 });
 
 export default Orders;

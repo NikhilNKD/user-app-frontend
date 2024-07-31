@@ -32,16 +32,16 @@ export const CartProvider = ({ children }) => {
   const [customerPincode, setCustomerPincode] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false); // Default to false
   const [isRegistered, setIsRegistered] = useState(false); 
+   
 
   // Function to add item to cart for a specific customer
   const addToCart = (custPhoneNumber, item, shopkeeperName, shopkeeperPhoneNumber, shopID, type = 'product') => {
     const updatedCartItems = { ...cartItems };
-    console.log('Add to Cart Called with:', { custPhoneNumber, item, shopkeeperPhoneNumber, shopID, type });
     if (!updatedCartItems[custPhoneNumber]) {
       updatedCartItems[custPhoneNumber] = [];
     }
   
-    const existingItemIndex = updatedCartItems[custPhoneNumber].findIndex(cartItem => 
+    const existingItemIndex = updatedCartItems[custPhoneNumber].findIndex(cartItem =>
       cartItem.id === item.id && cartItem.shopID === shopID && cartItem.type === type
     );
   
@@ -51,17 +51,15 @@ export const CartProvider = ({ children }) => {
       updatedCartItems[custPhoneNumber].push({
         ...item,
         quantity: 1,
-        shopkeeperName,
+        shopkeeperName, // Ensure this is correctly added
         shopkeeperPhoneNumber,
         shopID,
-        type
+        type,
       });
     }
   
     setCartItems(updatedCartItems);
   };
-  
-
   // Function to remove item from cart for a specific customer
   const removeFromCart = (custPhoneNumber, productId) => {
     const updatedCartItems = { ...cartItems };

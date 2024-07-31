@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity, Button, Image, Modal } from 'react-native';
 
 export default function SubSalonService({ route, navigation }) {
-    const { mainServiceId, phoneNumber, shopkeeperName } = route.params;
+    const { mainServiceId, shopkeeperPhoneNumber, shopkeeperName } = route.params;
 
     const [subServices, setSubServices] = useState([]);
     const [selectedServices, setSelectedServices] = useState([]);
@@ -70,7 +70,7 @@ export default function SubSalonService({ route, navigation }) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    phoneNumber: phoneNumber,
+                    phoneNumber: shopkeeperPhoneNumber,
                     selectedServices: selectedServices.map(service => ({
                         mainServiceId,
                         subServiceId: service.id,
@@ -80,7 +80,7 @@ export default function SubSalonService({ route, navigation }) {
             });
 
             setSelectedServices([]);
-            navigation.navigate('MyServices', { phoneNumber: phoneNumber });
+            navigation.navigate('MyServices', { shopkeeperPhoneNumber: shopkeeperPhoneNumber });
         } catch (error) {
             console.error('Error navigating to MyServices:', error);
         }
@@ -92,7 +92,7 @@ export default function SubSalonService({ route, navigation }) {
                 <Image source={require('../../../../../../assets/logo.png')} style={styles.storeImage} />
                 <View style={styles.headerText}>
                     <Text style={styles.welcomeText}>Welcome: {shopkeeperName}{mainServiceId}</Text>
-                    <Text style={styles.shoppingAt}>Shop ID: {phoneNumber}</Text>
+                    <Text style={styles.shoppingAt}>Shop ID: {shopkeeperPhoneNumber}</Text>
                     <Text style={styles.shoppingAt}>Subscription Valid till 10 October 2024</Text>
                 </View>
             </View>

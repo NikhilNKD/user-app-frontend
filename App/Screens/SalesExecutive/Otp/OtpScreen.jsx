@@ -1,23 +1,51 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button } from 'react-native';
 
-export default function OtpScreen({ navigation , route }) {
+export default function OtpScreen({ navigation, route }) {
   const [otp, setOtp] = useState('');
   const [error, setError] = useState('');
   
-  const { mobileNumber } = route.params;
+  const { phoneNumber, userType } = route.params;
 
-  const handleVerifyOtp = () => {
-    if (otp === '1234') {
-      navigation.navigate('SalesHomePage' , {mobileNumber:mobileNumber});
-    } else {
-      setError('Incorrect OTP. Please try again.');
+  const handleVerifyOtp = async () => {
+    try {
+      const response = await fetch('http://192.168.29.67:3000/api/v1/otp/validate-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ phoneNumber, otp }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server Error: ${errorText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.message === 'Invalid or expired OTP') {
+        setError('Incorrect OTP. Please try again.');
+        return;
+      }
+
+      const { token, phoneNumber: responsePhoneNumber } = data;
+
+      if (phoneNumber !== responsePhoneNumber) {
+        setError('Phone number mismatch. Please try again.');
+        return;
+      }
+
+      // Navigate to SalesHomePage with the phone number and token
+      navigation.navigate('SalesHomePage', { phoneNumber: responsePhoneNumber, token });
+    } catch (error) {
+      setError(error.message);
     }
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Enter OTP : {mobileNumber}</Text>
+      <Text style={styles.heading}>Enter OTP : {phoneNumber}</Text>
       <TextInput
         style={styles.input}
         placeholder="Enter OTP"

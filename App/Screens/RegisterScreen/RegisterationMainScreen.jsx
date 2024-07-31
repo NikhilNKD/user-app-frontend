@@ -27,7 +27,7 @@ export default function RegisterationMainScreen({ route }) {
                 source={require('../../../assets/logo.png')}
                 style={styles.logo}
             />
-            <Text style={styles.registerText}>Register Now</Text>
+            <Text style={styles.registerText}>Register Now{phoneNumber}</Text>
             <TouchableOpacity style={styles.card} onPress={handleShopKeeperPress}>
                 <Fontisto name="person" size={windowWidth * 0.2} color="black" />
                 <Text style={styles.cardText}>Shopkeeper</Text>

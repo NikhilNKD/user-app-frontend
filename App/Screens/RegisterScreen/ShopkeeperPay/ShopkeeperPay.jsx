@@ -33,7 +33,7 @@ const handleNavigation = () => {
   
   if(selectedCategoryType === "service"){
   navigation.navigate('ShopkeeperHome', {
-    userType:userType,
+      userType:userType,
       phoneNumber: phoneNumber,
       selectedCategory:selectedCategory,
       selectedSubCategory: selectedSubCategory,
@@ -42,8 +42,8 @@ const handleNavigation = () => {
   });
 }
   if(selectedCategoryType === "product"){
-  navigation.navigate('ShopkeeperProductHome', {
-    userType:userType,
+      navigation.navigate('ShopkeeperProductHome', {
+      userType:userType,
       phoneNumber: phoneNumber,
       selectedSubCategory: selectedSubCategory,
       selectedSubCategoryId:selectedSubCategoryId,
@@ -76,7 +76,7 @@ const handleNavigation = () => {
 
       {/* Button */}
       <TouchableOpacity style={styles.button} onPress={handleNavigation}  >
-        <Text style={styles.buttonText}>Customize{selectedCategoryType}</Text>
+        <Text style={styles.buttonText}>Customize{selectedCategoryType}{phoneNumber}</Text>
       </TouchableOpacity>
     </View>
   );

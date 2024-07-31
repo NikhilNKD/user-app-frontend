@@ -18,15 +18,14 @@ export default function SalonShop({ route }) {
 
     const fetchShopkeeperDetails = async () => {
         try {
-            const response = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeper/service/${phoneNumber}`);
+            const response = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeperDetails/service/${phoneNumber}`);
+            console.log('Response:', response);  // Debugging statement
             if (response.ok) {
                 const { data } = await response.json();
                 console.log('Fetched shopkeeper details:', data);  // Log the fetched data
-    
                 setShopkeeperName(data.shopkeeperName);
                 setShopkeeperPhoneNumber(phoneNumber);
                 setSelectedSubCategory(data.selectedSubCategory || '');
-                
             } else {
                 console.error('Failed to fetch shopkeeper details:', response.statusText);
             }
@@ -49,7 +48,7 @@ export default function SalonShop({ route }) {
     const handleButtonPress = (screenName) => {
         navigation.navigate(screenName, {
             selectedSubCategory,
-            phoneNumber: shopkeeperPhoneNumber,
+            shopkeeperPhoneNumber:shopkeeperPhoneNumber,
             shopkeeperName,
             selectedCategory,
         });
@@ -88,7 +87,7 @@ export default function SalonShop({ route }) {
                         <View style={styles.headerText}>
                             <Text style={styles.welcomeText}>Welcome: {shopkeeperName} {selectedCategory}{selectedSubCategory}</Text>
                             <Text style={styles.shoppingAt}>Shop ID: {shopkeeperPhoneNumber}</Text>
-                            <Text style={styles.shoppingAt}>Subscription Valid till 10 October 2024</Text>
+                            <Text style={styles.shoppingAt}>Subscription Valid till 10 October 2024{phoneNumber}</Text>
                         </View>
                     </View>
 

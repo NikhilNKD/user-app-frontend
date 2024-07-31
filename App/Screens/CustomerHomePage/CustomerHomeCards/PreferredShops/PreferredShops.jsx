@@ -6,13 +6,13 @@ import { AntDesign } from '@expo/vector-icons';
 
 export default function PreferredShops({ route }) {
   const [shops, setShops] = useState([]);
-  const { phoneNumber,shopID } = route.params || {};
+  const { custPhoneNumber,shopID } = route.params || {};
   const navigation = useNavigation();
 
   useEffect(() => {
     const fetchPreferredShops = async () => {
       try {
-        const response = await axios.get(`http://192.168.29.67:3000/api/v1/preferredShops/getPreferredShops/${phoneNumber}`);
+        const response = await axios.get(`http://192.168.29.67:3000/api/v1/preferredShops/getPreferredShops/${custPhoneNumber}`);
         setShops(response.data.data); // Assuming `data` is the actual array of shops
       } catch (error) {
         console.error('Error fetching preferred shops:', error);
@@ -20,7 +20,7 @@ export default function PreferredShops({ route }) {
     };
 
     fetchPreferredShops();
-  }, [phoneNumber]);
+  }, [custPhoneNumber]);
 
   const handleShopPress = (shop) => {
     const { phoneNumber, storeImage, shopkeeperName, shopType } = shop;
@@ -28,14 +28,14 @@ export default function PreferredShops({ route }) {
     if (shopType === 'product') {
         navigation.navigate('ShopkeeperMyProducts', { shopkeeperPhonenumber:phoneNumber, storeImage, shopkeeperName });
     } else if (shopType === 'service') {
-        navigation.navigate('MyServices', { phoneNumber, storeImage, shopkeeperName });
+        navigation.navigate('MyServices', { custPhoneNumber, storeImage, shopkeeperName });
     }
   };
 
   const handleDeleteShop = async (shopID) => {
     try {
       const response = await axios.delete('http://192.168.29.67:3000/api/v1/preferredShops/removePreferredShop', {
-        data: { customerPhoneNumber: phoneNumber, shopID: shopID }
+        data: { customerPhoneNumber: custPhoneNumber, shopID: shopID }
       });
 
       if (response.status === 200) {
@@ -74,7 +74,7 @@ export default function PreferredShops({ route }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Preferred Shops{phoneNumber}{shopID}</Text>
+      <Text style={styles.title}>Preferred Shops{custPhoneNumber}{shopID}</Text>
       <FlatList
         data={shops}
         renderItem={renderShop}

@@ -13,7 +13,7 @@ export default function RegisterShop({ route }) {
     const [shopState, setShopState] = useState('');
     const [city, setCity] = useState('');
     const [address, setAddress] = useState('');
-    const [salesAssociateNumber, setSalesAssociateNumber] = useState('');
+    const [shopkeeperPhoneNumber, setShopkeeperPhoneNumber] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedSubCategory, setSelectedSubCategory] = useState('');
     const navigation = useNavigation();
@@ -21,13 +21,13 @@ export default function RegisterShop({ route }) {
     const [subCategories, setSubCategories] = useState([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState('');
     const [selectedSubCategoryId, setSelectedSubCategoryId] = useState('');
-	const [phoneNumber, setPhoneNumber] = useState('');
+	 
     const [isLoading, setIsLoading] = useState(true);
        const [selectedCategoryType, setSelectedCategoryType] = useState('');
   
-
+ 
 	
-	const { mobileNumber } = route.params;
+	const {phoneNumber} = route.params;
 
     
     useEffect(() => {
@@ -53,7 +53,6 @@ export default function RegisterShop({ route }) {
         };
         fetchCategories();
     }, []);
-
     useEffect(() => {
         const fetchSubCategories = async () => {
             try {
@@ -75,46 +74,47 @@ export default function RegisterShop({ route }) {
                 console.error('Error fetching sub-categories:', error);
             }
         };
-
+    
         fetchSubCategories();
     }, [selectedCategoryId]);
+    
 
     const handleSubmit = async () => {
-        if (!shopkeeperName.trim() || !shopID.trim() || !pincode.trim() || !shopState.trim() || !city.trim() || !address.trim() || !mobileNumber || !selectedCategory) {
+        if (!shopkeeperName.trim() || !shopID.trim() || !pincode.trim() || !shopState.trim() || !city.trim() || !address.trim() || !phoneNumber || !selectedCategory) {
             Alert.alert("Missing Fields", "Please fill in all required fields.");
             return;
         }
     
         try {
-            const response = await fetch('http://192.168.29.67:3000/registerSales', {
+            const response = await fetch('http://192.168.29.67:3000/api/v1/sales/register-sales', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    phoneNumber,
+                    phoneNumber: shopkeeperPhoneNumber,
                     shopkeeperName,
                     shopID,
                     pincode,
                     shopState,
                     city,
                     address,
-                    salesAssociateNumber: mobileNumber, // Use mobileNumber from route params
+                    salesAssociateNumber: phoneNumber, // Use mobileNumber from route params
                     selectedCategory,
                     selectedSubCategory,
                 }),
             });
-    
+
             if (!response.ok) {
                 throw new Error('Failed to register shopkeeper');
             }
-    
+
             const responseData = await response.json();
+            console.log('Shopkeeper registered successfully:', responseData); // Log successful registration
             alert("Shopkeeper registered");
-            console.log(responseData.message);
     
             navigation.navigate('Subscription', {
-                phoneNumber: phoneNumber,
+                phoneNumber: shopkeeperPhoneNumber,
                 selectedSubCategory: selectedSubCategory,
                 selectedSubCategoryId: selectedSubCategoryId,
             });
@@ -139,13 +139,13 @@ export default function RegisterShop({ route }) {
     return (
         <ScrollView contentContainerStyle={styles.scrollViewContent} keyboardShouldPersistTaps="handled">
             <View style={styles.container}>
-                <Text style={styles.heading}>Shopkeeper Registration:{mobileNumber}</Text>
+                <Text style={styles.heading}>Shopkeeper Registration:{phoneNumber}</Text>
 				<View style={styles.inputContainer}>
                 <Text style={styles.label}>Shopkeeper Phone Number</Text>
                 <TextInput
                     style={styles.input}
-                    value={phoneNumber}
-                    onChangeText={setPhoneNumber}
+                    value={shopkeeperPhoneNumber}
+                    onChangeText={setShopkeeperPhoneNumber}
                     placeholder="Enter Shopkeeper Phone Number"
                     keyboardType="numeric"
                 />
@@ -173,7 +173,7 @@ export default function RegisterShop({ route }) {
                 <TextInput
                     style={[styles.input]}
                     placeholder="Sales Associate's Number"
-                    value={mobileNumber} // Set the value to mobileNumber
+                    value={phoneNumber} // Set the value to mobileNumber
                     editable={false} // Make it read-only
                     keyboardType="numeric"
                 />
@@ -238,7 +238,7 @@ export default function RegisterShop({ route }) {
                         selectedValue={selectedSubCategory}
                         onValueChange={(itemValue) => {
                             setSelectedSubCategory(itemValue);
-                            const subCategory = subCategories.find(sub => sub.name === itemValue);
+                            const subCategory = subCategories.find(sub => sub.sub_category === itemValue); // Adjust based on actual field names
                             setSelectedSubCategoryId(subCategory ? subCategory.id : '');
                         }}
                         style={styles.picker}
@@ -246,7 +246,7 @@ export default function RegisterShop({ route }) {
                     >
                         <Picker.Item label="Select a subcategory" value="" />
                         {subCategories.map((subCategory) => (
-                            <Picker.Item key={subCategory.id} label={subCategory.name} value={subCategory.name} />
+                            <Picker.Item key={subCategory.id} label={subCategory.sub_category} value={subCategory.sub_category} /> // Adjust based on actual field names
                         ))}
                     </Picker>
                 </View>

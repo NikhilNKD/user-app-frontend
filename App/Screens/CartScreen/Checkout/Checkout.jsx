@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
+import {useCart} from '../../../Context/ContextApi';
+ 
 const Checkout = ({ route }) => {
   const {
     cartItems,
     totalPrice,
-    shopID,
-    custName,
     selectedDate: selectedDateString,
     selectedTime: selectedTimeString,
     firstCustomerName,
     custPhoneNumber
   } = route.params;
+  
+  const {clearCart} = useCart();
 
   // Convert ISO strings back to Date objects
   const selectedDate = new Date(selectedDateString);
@@ -61,39 +62,44 @@ const Checkout = ({ route }) => {
       for (const [shopID, items] of Object.entries(groupedCartItems)) {
         const shopkeeperPhoneNumber = items[0]?.shopkeeperPhoneNumber;
         const shopkeeperName = shopkeeperDetails[shopkeeperPhoneNumber]?.shopkeeperName || items[0]?.shopkeeperName;
-
-        // Calculate total price for the current shop
+  
         const shopTotalPrice = items.reduce((sum, item) => {
-          return sum + (item.price || 0) * (item.quantity || 0);
+          const price = item.type === 'service' ? parseFloat(item.subServicePrice) : parseFloat(item.price);
+          return sum + (price * (item.quantity || 0));
         }, 0);
-
+  
+        // Format the time to HH:MM
+        const formattedTime = selectedTime ? selectedTime.toISOString().slice(11, 16) : null; // HH:MM
+  
         const orderData = {
-          custName: firstCustomerName,
+          customerName: firstCustomerName,
           cartItems: items,
-          totalPrice: shopTotalPrice, // Total price for the current shop
-          selectedDate,
-          selectedTime,
+          totalPrice: shopTotalPrice.toFixed(2),
+          selectedDate: selectedDate ? selectedDate.toISOString().slice(0, 10) : null, // YYYY-MM-DD
+          selectedTime: formattedTime,
           shopID,
           shopkeeperName,
           custPhoneNumber,
           shopkeeperPhoneNumber,
         };
-
-        const response = await fetch('http://192.168.29.67:3000/api/v1/customerOrders/saveOrder', {
+  
+        console.log("Order Data to be sent:", orderData);  // Log the order data
+  
+        const response = await fetch('http://192.168.29.67:3000/api/v1/customerOrders/placeOrder', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify(orderData),
         });
-
+  
         if (!response.ok) {
           throw new Error('Failed to save the order.');
         }
-
+  
         Alert.alert('Order placed successfully!');
       }
-
+      clearCart(custPhoneNumber); 
       navigation.navigate('Pay', { custPhoneNumber: custPhoneNumber });
     } catch (error) {
       Alert.alert('Failed to save the order. Please try again.');

@@ -2,24 +2,23 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button } from 'react-native';
 import axios from 'axios';
 
-export default function RegisterSales({ navigation , route }) {
+export default function RegisterSales({ navigation, route }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
- 
   const [pincode, setPincode] = useState('');
   
-  const {mobileNumber} = route.params
+  const { phoneNumber } = route.params;
 
   const handleSubmit = () => {
     axios.post('http://192.168.29.67:3000/api/v1/sales/submit-form', {
       firstName,
-      lastName, 
-      mobileNumber,
+      lastName,
+      phoneNumber, //950066
       pincode
     })
     .then(response => {
       console.log('Data saved successfully');
-      navigation.navigate('OtpScreen',{ mobileNumber: mobileNumber });
+      navigation.navigate('OtpScreen', { phoneNumber });
     })
     .catch(error => {
       console.error('Error saving data:', error);
@@ -44,16 +43,15 @@ export default function RegisterSales({ navigation , route }) {
         />
         <TextInput
           style={styles.input}
-          placeholder="Mobile Number"
-          value={mobileNumber}
-          onChangeText={text => setMobileNumber(text)}
-          keyboardType="phone-pad"
-        />
-        <TextInput
-          style={styles.input}
           placeholder="Pincode"
           value={pincode}
           onChangeText={text => setPincode(text)}
+          keyboardType="numeric"
+        />
+        <TextInput
+          style={styles.input}
+          editable={false}
+          value={phoneNumber}
           keyboardType="numeric"
         />
       </View>

@@ -3,8 +3,8 @@ import { View, Text, FlatList, ActivityIndicator, StyleSheet, TouchableOpacity }
 import { useCart } from '../../../../Context/ContextApi';
 
 const SubServices = ({ route }) => {
-  const { shopPhoneNumber, mainServiceId, userType, firstCustomerName, custPhoneNumber } = route.params;
-  const { addToCart, setCustPhoneNumber } = useCart(); // Destructure useCart hook
+  const { shopkeeperPhoneNumber, mainServiceId, userType, firstCustomerName, custPhoneNumber, shopkeeperName } = route.params;
+  const { addToCart, setCustPhoneNumber } = useCart();
   const [subServices, setSubServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [shopID, setShopID] = useState('');
@@ -13,11 +13,11 @@ const SubServices = ({ route }) => {
     fetchSubServices();
     fetchShopDetails();
     setCustPhoneNumber(custPhoneNumber);
-  }, [shopPhoneNumber, mainServiceId, setCustPhoneNumber]);
+  }, [shopkeeperPhoneNumber, mainServiceId, setCustPhoneNumber]);
 
   const fetchSubServices = async () => {
     try {
-      const response = await fetch(`http://192.168.29.67:3000/api/v1/services/selectedSubServices/${shopPhoneNumber}/${mainServiceId}`);
+      const response = await fetch(`http://192.168.29.67:3000/api/v1/services/selectedSubServices/${shopkeeperPhoneNumber}/${mainServiceId}`);
       if (response.ok) {
         const data = await response.json();
         if (data && Array.isArray(data.data)) {
@@ -31,7 +31,7 @@ const SubServices = ({ route }) => {
               subServicePrice: subService.price.toString(),
               shopkeeperPhoneNumber: subService.phoneNumber // Ensure this is available
             }));
-          console.log('Filtered Data:', filteredData); // Log filtered data
+          console.log('Filtered Data:', filteredData);
           setSubServices(filteredData);
         } else {
           console.error('Expected data.data to be an array, but got:', data);
@@ -49,11 +49,11 @@ const SubServices = ({ route }) => {
 
   const fetchShopDetails = async () => {
     try {
-      const response = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeperDetails/service/${shopPhoneNumber}`);
+      const response = await fetch(`http://192.168.29.67:3000/api/v1/shopkeeperDetails/service/${shopkeeperPhoneNumber}`);
       if (response.ok) {
         const data = await response.json();
-        console.log('Fetched Shop Details:', data); // Log the data for debugging
-        setShopID(data.data.shopID); // Ensure `data.data.shopID` is correctly assigned
+        console.log('Fetched Shop Details:', data);
+        setShopID(data.data.shopID);
       } else {
         console.error('Failed to fetch shop details:', response.statusText);
       }
@@ -61,11 +61,9 @@ const SubServices = ({ route }) => {
       console.error('Error fetching shop details:', error);
     }
   };
-  
 
   const renderSubService = ({ item }) => {
-    console.log('Rendering item:', item); // Add this line to log the item
-    
+    console.log('Rendering item:', item);
     return (
       <View style={styles.card}>
         <View style={styles.detailsContainer}>
@@ -73,13 +71,12 @@ const SubServices = ({ route }) => {
           <Text style={styles.subServicePrice}>Price: ₹{item.subServicePrice}</Text>
           {userType === 'customer' && (
             <TouchableOpacity 
-              onPress={() => addToCart(custPhoneNumber, item, '', item.shopkeeperPhoneNumber, shopID, 'service')} 
+              onPress={() => addToCart(custPhoneNumber, item, shopkeeperName, item.shopkeeperPhoneNumber, shopID, 'service')} 
               style={styles.addToCartButton}
             >
               <Text style={styles.addToCartButtonText}>Add to Cart</Text>
             </TouchableOpacity>
           )}
-        
         </View>
       </View>
     );
@@ -87,8 +84,9 @@ const SubServices = ({ route }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Welcome: {firstCustomerName}</Text>
-      <Text style={styles.welcomeText}>Shop Phone number: {shopPhoneNumber}</Text>
+      <Text style={styles.welcomeText}>Welcome: {shopkeeperName}</Text>
+      <Text style={styles.welcomeText}>Shop Phone number: {shopkeeperPhoneNumber}</Text>
+      <Text style={styles.welcomeText}>Customer PhoneNumber: {custPhoneNumber}</Text>
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : subServices.length === 0 ? (
@@ -104,7 +102,6 @@ const SubServices = ({ route }) => {
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {

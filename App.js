@@ -21,9 +21,7 @@ import MyAddress from './App/Screens/CustomerHomePage/CustomerHomeCards/MyAddres
 import PreferredShops from './App/Screens/CustomerHomePage/CustomerHomeCards/PreferredShops/PreferredShops.jsx';
 import ChangePincode from './App/Screens/CustomerHomePage/CustomerHomeCards/SearchShops/ChangePincode.jsx';
 import CustomDrawer from './App/Components/CustomDrawer/CustomDrawer.jsx';
-import StoreScreen from './App/Screens/CustomerHomePage/StoreScreen/StoreScreen.jsx';
 import CartScreen from './App/Screens/CartScreen/CartScreen.jsx';
-import ProductDetails from './App/Screens/CustomerHomePage/StoreScreen/ProductDetails/ProductDetails.jsx';
 import { CartProvider } from './App/Context/ContextApi.js'; 
 import ChangeAddress from './App/Screens/CartScreen/ChangeAddress/ChangeAddress.jsx';
 import Checkout from './App/Screens/CartScreen/Checkout/Checkout.jsx';
@@ -62,7 +60,7 @@ import ProductInventory from './App/Screens/RegisterScreen/ShopkeeperProductHome
 import ShopkeeperMyProducts from './App/Screens/RegisterScreen/ShopkeeperProductHome/ShopkeeperMyProducts.jsx/ShopkeeperMyProducts.jsx';
 import ShopkeeperProfileScreen from './App/Screens/RegisterScreen/ShopkeeperProfileScreen/ShopkeeperProfileScreen.jsx';
 import CategoryDetails from './App/Screens/RegisterScreen/ShopkeeperProductHome/ShopkeeperMyProducts.jsx/CategoryDetails.jsx';
-import ProductOrders from './App/Screens/CustomerHomePage/CustomerHomeCards/ProductOrders/ProductOrders.jsx';
+ 
  
  
 const Stack = createNativeStackNavigator();
@@ -85,8 +83,6 @@ function StackNavigator({ formSubmitted }) {
       <Stack.Screen name="MyAddress" component={MyAddress}options={{ headerShown: false }} />
       <Stack.Screen name="SearchShops" component={SearchShops}options={{ headerShown: false }} />
       <Stack.Screen name="Pincode" component={ChangePincode}options={{ headerShown: false }} />
-      <Stack.Screen name="Store" component={StoreScreen}options={{ headerShown: false }} />
-      <Stack.Screen name="ProductDetails" component={ProductDetails}options={{ headerShown: false }} />
       <Stack.Screen name="ChangeAddress" component={ChangeAddress}options={{ headerShown: false }} />
       <Stack.Screen name="Checkout" component={Checkout}options={{ headerShown: false }} />
       <Stack.Screen name="AddNewAddress" component={AddNewAddress}options={{ headerShown: false }} />
@@ -124,7 +120,7 @@ function StackNavigator({ formSubmitted }) {
       <Stack.Screen name="ShopkeeperMyProducts" component={ShopkeeperMyProducts}options={{ headerShown: false }} />
       <Stack.Screen name="ShopkeeperProfileScreen" component={ShopkeeperProfileScreen}options={{ headerShown: false }} />
       <Stack.Screen name="CategoryDetails" component={CategoryDetails}options={{ headerShown: false }} />
-      <Stack.Screen name="ProductOrders" component={ProductOrders}options={{ headerShown: false }} />
+   
     </Stack.Navigator>
   );
 }

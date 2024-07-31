@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView , Alert } from 'react-native';
 import { useCart, useCustomer } from '../../Context/ContextApi';
 import { useNavigation } from '@react-navigation/native';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import moment from 'moment';
 import { MaterialIcons } from '@expo/vector-icons';
 
+ 
 const CartScreen = () => {
   const { cartItems, removeFromCart, setCartItems, custPhoneNumber, shopID, shopkeeperPhoneNumber } = useCart();
   const { firstCustomerName } = useCustomer();
@@ -20,11 +21,12 @@ const CartScreen = () => {
     <View key={item.id} style={styles.itemContainer}>
       <View style={styles.itemInfoContainer}>
         <Text style={styles.itemName}>{item.main_category}</Text>
-        <Text>Name: {item.type === 'service' ? item.subServiceName : item.product_name}</Text>
+        <Text>{item.type === 'service' ? item.subServiceName : item.product_name}</Text>
         {item.type !== 'service' && <Text>Brand: {item.brand_name}</Text>}
         <Text>Store Name: {item.shopID}</Text>
         {item.type !== 'service' && <Text>Weight: {item.weight}</Text>}
-        <Text>Phone number: {item.shopkeeperPhoneNumber}</Text>
+        <Text>Shopkeeper Phone number: {item.shopkeeperPhoneNumber}</Text>
+        <Text>Shopkeeper Name: {item.shopkeeperName}</Text>
         <View style={styles.quantityContainer}>
           <TouchableOpacity onPress={() => updateQuantity(item.id, -1)} style={styles.quantityButton}>
             <Text style={styles.quantityButtonText}>-</Text>
@@ -42,6 +44,10 @@ const CartScreen = () => {
   );
 
   const updateQuantity = (productId, value) => {
+    if (!cartItems[custPhoneNumber]) {
+      return;  // No cart items for this customer
+    }
+
     const updatedCartItems = { ...cartItems };
     updatedCartItems[custPhoneNumber] = updatedCartItems[custPhoneNumber].map(item => {
       if (item.id === productId) {
@@ -53,39 +59,43 @@ const CartScreen = () => {
       }
       return item;
     });
+
     setCartItems(updatedCartItems);
   };
 
   const calculateTotalPrice = () => {
-    let totalPrice = 0;
-    if (cartItems[custPhoneNumber]) {
-      cartItems[custPhoneNumber].forEach(item => {
-        totalPrice += item.type === 'service' ? item.subServicePrice * item.quantity : item.price * item.quantity;
-      });
+    if (!cartItems[custPhoneNumber]) {
+      return 0;
     }
-    return totalPrice.toFixed(2);
+
+    return cartItems[custPhoneNumber].reduce((totalPrice, item) => {
+      return totalPrice + (item.type === 'service' ? parseFloat(item.subServicePrice) : parseFloat(item.price)) * item.quantity;
+    }, 0).toFixed(2);
   };
 
   const handlePayAtShop = () => {
+    const hasService = cartItems[custPhoneNumber].some(item => item.type === 'service');
+
+    if (hasService && (!selectedDate || !selectedTime)) {
+      Alert.alert('Please select both date and time for your appointment.');
+      return;
+    }
+
     navigation.navigate('Checkout', {
       totalPrice: calculateTotalPrice(),
-      cartItems: cartItems[custPhoneNumber],
+      cartItems: cartItems[custPhoneNumber] || [],
       firstCustomerName,
       custPhoneNumber,
       shopkeeperPhoneNumber,
       shopID,
-      selectedDate: selectedDate.toISOString(),
-      selectedTime: selectedTime.toISOString(),
+      selectedDate: selectedDate ? selectedDate.toISOString() : null,
+      selectedTime: selectedTime ? selectedTime.toISOString() : null,
     });
   };
 
-  const showDatePicker = () => {
-    setDatePickerVisibility(true);
-  };
+  const showDatePicker = () => setDatePickerVisibility(true);
 
-  const hideDatePicker = () => {
-    setDatePickerVisibility(false);
-  };
+  const hideDatePicker = () => setDatePickerVisibility(false);
 
   const handleDateConfirm = (date) => {
     setSelectedDate(date);
@@ -93,13 +103,9 @@ const CartScreen = () => {
     showTimePicker();
   };
 
-  const showTimePicker = () => {
-    setTimePickerVisibility(true);
-  };
+  const showTimePicker = () => setTimePickerVisibility(true);
 
-  const hideTimePicker = () => {
-    setTimePickerVisibility(false);
-  };
+  const hideTimePicker = () => setTimePickerVisibility(false);
 
   const handleTimeConfirm = (time) => {
     setSelectedTime(time);
@@ -111,20 +117,18 @@ const CartScreen = () => {
       <View style={styles.headerContainer}>
         <Image source={require("../../../assets/logo.png")} style={styles.storeImage} />
         <View style={styles.headerText}>
-          <Text style={styles.welcomeText}>Welcome: {firstCustomerName}{custPhoneNumber}</Text>
+          <Text style={styles.welcomeText}>Welcome: {firstCustomerName} {custPhoneNumber}</Text>
         </View>
       </View>
       {cartItems[custPhoneNumber] && cartItems[custPhoneNumber].length === 0 ? (
         <Text style={styles.emptyCartText}>Your cart is empty!</Text>
       ) : (
-        cartItems[custPhoneNumber].map(item => renderItem(item))
+        cartItems[custPhoneNumber]?.map(item => renderItem(item))
       )}
       {cartItems[custPhoneNumber] && cartItems[custPhoneNumber].some(item => item.type === 'service') && (
         <View style={styles.appointmentContainer}>
           <TouchableOpacity
-            onPress={() => {
-              showDatePicker();
-            }}
+            onPress={() => showDatePicker()}
             style={styles.appointmentButton}
           >
             <Text style={styles.appointmentButtonText}>Schedule Appointment</Text>

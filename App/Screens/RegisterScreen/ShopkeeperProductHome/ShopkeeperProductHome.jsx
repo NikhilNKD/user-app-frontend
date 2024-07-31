@@ -9,6 +9,7 @@ export default function ShopkeeperProductHome({ route }) {
     const [isVisible1, setIsVisible1] = useState(true); // State for "Make Store LIVE" switch
     const [shopkeeperName, setShopkeeperName] = useState('');
     const [shopkeeperPhoneNumber, setShopkeeperPhoneNumber] = useState('');
+    const [shopID, setShopID] = useState('');
     const [selectedSubCategory, setSelectedSubCategory] = useState('');
     const { phoneNumber, selectedCategory, userType } = route.params;
     
@@ -16,6 +17,7 @@ export default function ShopkeeperProductHome({ route }) {
         fetchShopkeeperDetails();
     }, []);
 
+  
     const fetchShopkeeperDetails = async () => {
         try {
             console.log('Fetching shopkeeper details for phoneNumber:', phoneNumber);
@@ -33,6 +35,7 @@ export default function ShopkeeperProductHome({ route }) {
             if (response.ok) {
                 setShopkeeperName(data.data.shopkeeperName);
                 setShopkeeperPhoneNumber(route.params.phoneNumber);
+                setShopID(data.data.shopID); // Set shopID
                 setSelectedSubCategory(data.data.selectedSubCategory);
             } else {
                 console.error('Failed to fetch shopkeeper details:', data.message || response.statusText);
@@ -41,7 +44,6 @@ export default function ShopkeeperProductHome({ route }) {
             console.error('Error fetching shopkeeper details:', error);
         }
     };
-    
 
     const buttonsData = [
         { id: 6, title: 'My Products', screen: 'ShopkeeperMyProducts' },
@@ -72,7 +74,8 @@ export default function ShopkeeperProductHome({ route }) {
                 shopkeeperName: shopkeeperName,
                 selectedCategory: selectedCategory,
                 shopkeeperPhoneNumber: shopkeeperPhoneNumber,
-                userType: userType
+                userType: userType,
+                shopID:shopID
             });
         } else if (screenName === 'ShopkeeperProfileScreen') {
             // Pass selectedSubCategory as a parameter when navigating to the Profile screen
@@ -158,8 +161,8 @@ export default function ShopkeeperProductHome({ route }) {
                         <Image source={require('../../../../assets/logo.png')} style={styles.storeImage} />
                         <View style={styles.headerText}>
                             <Text style={styles.welcomeText}>Welcome:{shopkeeperName}  </Text>
-                            <Text style={styles.shoppingAt}>Shop ID: {shopkeeperPhoneNumber}</Text>
-                            <Text style={styles.shoppingAt}>Subscription Valid till 10 October 2024</Text>
+                            <Text style={styles.shoppingAt}>Shop ID: {shopkeeperPhoneNumber} </Text>
+                            <Text style={styles.shoppingAt}>Subscription Valid till 10 October 2024 </Text>
                         </View>
                     </View>
 

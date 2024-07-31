@@ -44,11 +44,15 @@ const ShopkeeperMyProducts = ({ route }) => {
     };
 
     const renderCategory = ({ item, index }) => (
-        <TouchableOpacity
-            style={[styles.categoryContainer, index % 2 === 1 ? styles.rightMargin : null]}
-            onPress={() => navigation.navigate('CategoryDetails', { category: item, shopkeeperPhoneNumber:shopkeeperPhoneNumber, userType:userType, shopkeeperName:shopkeeperName, shopID })}>
-            <Text style={styles.categoryName}>{item.main_category}</Text>
-        </TouchableOpacity>
+        <View style={[styles.categoryWrapper, index % 2 === 1 ? styles.rightMargin : null]}>
+            <TouchableOpacity
+                style={styles.categoryContainer}
+                onPress={() => navigation.navigate('CategoryDetails', { category: item, shopkeeperPhoneNumber, userType, shopkeeperName, shopID })}
+            >
+                <Text style={styles.categoryName}>{item.main_category}</Text>
+            </TouchableOpacity>
+            <Text style={styles.shopID}>{shopID}</Text>
+        </View>
     );
 
     return (
@@ -77,21 +81,30 @@ const styles = StyleSheet.create({
     contentContainer: {
         alignItems: 'center',
     },
-    categoryContainer: {
+    categoryWrapper: {
         marginBottom: 16,
+        width: itemWidth,
+        marginHorizontal: 4,
+        marginVertical: 8,
+        alignItems: 'center',
+    },
+    categoryContainer: {
         padding: 20,
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 8,
         backgroundColor: '#f9f9f9',
         alignItems: 'center',
-        width: itemWidth,
-        marginHorizontal: 4,
-        marginVertical: 8,
+        width: '100%',
     },
     categoryName: {
         fontSize: 18,
         fontWeight: 'bold',
+    },
+    shopID: {
+        marginTop: 8,
+        fontSize: 16,
+        color: '#666',
     },
     rightMargin: {
         marginRight: 0,

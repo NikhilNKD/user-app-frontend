@@ -5,30 +5,26 @@ import { useRoute } from '@react-navigation/native';
 const ViewOrder = () => {
   const route = useRoute();
   const { shopID, custPhoneNumber } = route.params;
-
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
       try {
-        // Fetch order details with route parameters
         const response = await fetch(`http://192.168.29.67:3000/api/v1/customerOrders/getOrderDetails/${shopID}/${custPhoneNumber}`);
         if (!response.ok) {
           throw new Error('Failed to fetch order details.');
         }
         const data = await response.json();
         console.log('Fetched Order Details:', data);  // Log the data to inspect structure
-        setOrders(data.orders);  // Set data to orders state; adjust based on the structure of the response
+        setOrders(data.orders);  // Set data to orders state
       } catch (error) {
         console.error('Error fetching order details:', error);
         Alert.alert('Failed to fetch order details. Please try again.');
       }
     };
-  
+
     fetchOrderDetails();
-  }, [shopID, custPhoneNumber]);  // Add dependencies for `shopID` and `custPhoneNumber`
-  
-    
+  }, [shopID, custPhoneNumber]);
 
   if (orders.length === 0) {
     return (
@@ -41,16 +37,32 @@ const ViewOrder = () => {
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Order Details for Shop: {shopID}</Text>
-      {orders.map((order, index) => (
-        <View key={index} style={styles.orderContainer}>
-          <Text>Total Price: ₹{order.totalPrice}</Text>
+      {orders.map((order) => (
+        <View key={order.id} style={styles.orderContainer}>
+          <Text style={styles.orderDetail}>Customer Name: {order.customerName}</Text>
+          <Text style={styles.orderDetail}>Selected Date: {order.selectedDate}</Text>
+          <Text style={styles.orderDetail}>Selected Time: {order.selectedTime}</Text>
+          <Text style={styles.orderDetail}>Total Price: ₹{order.totalPrice}</Text>
           <FlatList
-            data={order.cartItems}  // Assuming cartItems is already an array
+            data={order.cartItems}
             renderItem={({ item }) => (
               <View style={styles.cartItemContainer}>
-                <Text style={styles.productName}>{item.product_name}</Text>
-                <Text>Price: ₹{item.price}</Text>
-                <Text>Quantity: {item.quantity}</Text>
+                {item.type === 'service' ? (
+                  <>
+                    <Text style={styles.productName}>Subservice Name: {item.subServiceName}</Text>
+                    <Text>Price: ₹{item.subServicePrice}</Text>
+                    <Text>Quantity: {item.quantity}</Text>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.productName}>Product Name: {item.product_name}</Text>
+                    <Text>Brand: {item.brand_name}</Text>
+                    <Text>Price: ₹{item.price}</Text>
+                    <Text>Weight: {item.weight}</Text>
+                    <Text>Quantity: {item.quantity}</Text>
+                    <Text>Total: ₹{item.price * item.quantity}</Text>
+                  </>
+                )}
               </View>
             )}
             keyExtractor={(item) => item.id.toString()}
@@ -61,6 +73,7 @@ const ViewOrder = () => {
     </ScrollView>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {

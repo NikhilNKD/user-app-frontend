@@ -50,6 +50,7 @@ const CategoryDetails = ({ route }) => {
         <View style={styles.headerText}>
           <Text style={styles.welcomeText}>Welcome: {firstCustomerName}</Text>
           <Text style={styles.shoppingAt}>Shopping at: {shopkeeperPhoneNumber}</Text>
+          <Text style={styles.shoppingAt}>Shopping at: {shopID}</Text>
         </View>
       </View>
 

@@ -67,7 +67,7 @@ export default function CustomerHomePage({ route }) {
 
         <View style={styles.cardRow}>
           <View style={styles.card}>
-            <TouchableOpacity onPress={() => navigateToScreen('PrefferedShops', { firstcustomerName: firstCustomerName, shopID: shopID, phoneNumber: phoneNumber })}>
+            <TouchableOpacity onPress={() => navigateToScreen('PrefferedShops', { firstcustomerName: firstCustomerName, shopID: shopID, custPhoneNumber: phoneNumber })}>
               <View style={styles.cardContent}>
                 <View style={styles.iconWrapper}>
                   <FontAwesome5 name="shopping-cart" size={50} color="black" style={styles.icon} />
@@ -91,7 +91,7 @@ export default function CustomerHomePage({ route }) {
 
         <View style={styles.cardRow}>
           <View style={styles.card}>
-            <TouchableOpacity onPress={() => navigateToScreen('MyAddress', { firstcustomerName: firstCustomerName, shopID: shopID, phoneNumber: phoneNumber, userType: userType })}>
+            <TouchableOpacity onPress={() => navigateToScreen('MyAddress', { firstcustomerName: firstCustomerName, shopID: shopID, custPhoneNumber: phoneNumber, userType: userType })}>
               <View style={styles.cardContent}>
                 <View style={styles.iconWrapper}>
                   <MaterialCommunityIcons name="google-maps" size={50} color="black" style={styles.icon} />
@@ -102,7 +102,7 @@ export default function CustomerHomePage({ route }) {
           </View>
 
           <View style={styles.card}>
-            <TouchableOpacity onPress={() => navigateToScreen('SearchShops', { firstcustomerName: firstCustomerName, shopID: shopID, userType: userType, phoneNumber: phoneNumber, selectedCategory: selectedCategory, customerPinode: customerPincode })}>
+            <TouchableOpacity onPress={() => navigateToScreen('SearchShops', { firstcustomerName: firstCustomerName, shopID: shopID, userType: userType, custPhoneNumber: phoneNumber, selectedCategory: selectedCategory, customerPinode: customerPincode })}>
               <View style={styles.cardContent}>
                 <View style={styles.iconWrapper}>
                   <MaterialCommunityIcons name="shopping-search" size={50} color="black" style={styles.icon} />

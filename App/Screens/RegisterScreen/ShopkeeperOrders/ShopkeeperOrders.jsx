@@ -54,7 +54,7 @@ export default function ShopkeeperOrders({ route }) {
               </View>
               {product.picture_path ? (
                 <Image
-                  source={{ uri: `http://192.168.29.67:3000${product.picture_path}` }}
+                  source={{ uri: `http://192.168.29.67:3000/${product.picture_path}` }}
                   style={styles.productImage}
                 />
               ) : null}

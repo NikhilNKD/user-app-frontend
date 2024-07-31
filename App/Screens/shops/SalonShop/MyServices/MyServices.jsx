@@ -4,7 +4,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useCart } from '../../../../Context/ContextApi';
 
 const MyServices = ({ route, navigation }) => {
-    const { phoneNumber, userType, shopID, firstcustomerName, custPhoneNumber, shopkeeperName } = route.params;
+    const { shopkeeperPhoneNumber, userType, shopID, firstcustomerName, custPhoneNumber, shopkeeperName } = route.params;
     const [mainServices, setMainServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const { setGlobalPhoneNumber } = useCart();
@@ -12,7 +12,7 @@ const MyServices = ({ route, navigation }) => {
     useEffect(() => {
         const fetchMainServices = async () => {
             try {
-                const response = await fetch(`http://192.168.29.67:3000/api/v1/services/selectedMainServices/${phoneNumber}`);
+                const response = await fetch(`http://192.168.29.67:3000/api/v1/services/selectedMainServices/${shopkeeperPhoneNumber}`);
                 
                 const contentType = response.headers.get('Content-Type');
                 if (contentType && contentType.includes('application/json')) {
@@ -30,13 +30,13 @@ const MyServices = ({ route, navigation }) => {
                 setLoading(false);
             }
         };
-        setGlobalPhoneNumber(phoneNumber);
+        setGlobalPhoneNumber(shopkeeperPhoneNumber);
     
         fetchMainServices();
-    }, [phoneNumber, setGlobalPhoneNumber]);
+    }, [shopkeeperPhoneNumber, setGlobalPhoneNumber]);
     
     const handleMainServiceClick = (id) => {
-        navigation.navigate('SelectedServices', { shopPhoneNumber: phoneNumber, mainServiceId: id, userType, shopID, firstcustomerName, custPhoneNumber });
+        navigation.navigate('SelectedServices', { shopkeeperPhoneNumber: shopkeeperPhoneNumber, mainServiceId: id, userType, shopID, firstcustomerName, custPhoneNumber,shopkeeperName:shopkeeperName });
     };
 
     return (
@@ -45,7 +45,9 @@ const MyServices = ({ route, navigation }) => {
                 <Image source={require('../../../../../assets/logo.png')} style={styles.storeImage} />
                 <View style={styles.headerText}>
                     <Text style={styles.welcomeText}>Welcome: {shopkeeperName}</Text>
-                    <Text style={styles.welcomeText}>Phone: {phoneNumber}</Text>
+                    <Text style={styles.welcomeText}>Phone: {shopkeeperPhoneNumber}</Text>
+                    <Text style={styles.welcomeText}>Phone: {custPhoneNumber}</Text>
+                  
                     {userType !== 'customer' && (
                         <Text style={styles.shoppingAt}>Subscription Valid till 10 October 2024</Text>
                     )}
@@ -55,7 +57,7 @@ const MyServices = ({ route, navigation }) => {
             {loading ? (
                 <ActivityIndicator size="large" color="#0000ff" />
             ) : mainServices.length === 0 ? (
-                <Text style={styles.noServicesText}>No selected services found for this phone number: {phoneNumber}</Text>
+                <Text style={styles.noServicesText}>No selected services found for this phone number: {shopkeeperPhoneNumber}</Text>
             ) : (
                 <FlatList
                     data={mainServices}

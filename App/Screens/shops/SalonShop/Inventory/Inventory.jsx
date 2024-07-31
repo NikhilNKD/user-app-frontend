@@ -37,7 +37,7 @@ const Inventory = ({ route }) => {
             onPress={() => navigation.navigate('SubSalonService',
             {
                 mainServiceId: item.id,
-                phoneNumber,
+                shopkeeperPhoneNumber,
                 shopkeeperName
             })}
         >
@@ -54,6 +54,7 @@ const Inventory = ({ route }) => {
                 <View style={styles.headerText}>
                     <Text style={styles.welcomeText}>Welcome: {shopkeeperName}</Text>
                     <Text style={styles.shoppingAt}>Shop ID: {selectedSubCategory}</Text>
+                    <Text style={styles.shoppingAt}>Shop ID: {shopkeeperPhoneNumber}</Text>
                     <Text style={styles.shoppingAt}>Subscription Valid till 10 October 2024</Text>
                 </View>
             </View>
